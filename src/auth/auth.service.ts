@@ -13,12 +13,12 @@ export class AuthService {
   async signup(
     email: string,
     password: string,
-  ): Promise<{ accssToken: string }> {
+  ): Promise<{ accessToken: string }> {
     const user = await this.usersService.create(email, password);
     const payload = { email: user.email, sub: user.id };
 
     return {
-      accssToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
     };
   }
 
