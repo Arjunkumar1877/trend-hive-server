@@ -1,7 +1,20 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
+  @ApiProperty({
+    example: 'John ddoe',
+    description: 'This is the name of the user',
+  })
+  @IsString()
+  name: string;
+
   @ApiProperty({
     example: 'test@email.com',
     description: 'This is the email of the user',
@@ -13,9 +26,25 @@ export class CreateUserDto {
     example: 'password',
     description: 'Ths is the password of the user',
   })
-  @IsString()
+  @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @ApiProperty({
+    example: '98782435546',
+    description: 'Users phone number',
+  })
+  @IsOptional()
+  @IsString()
+  phoneNumber: string;
+
+  @ApiProperty({
+    example: '123432234gdd',
+    description: 'Users firbase uid',
+  })
+  @IsOptional()
+  @IsString()
+  firbaseId: string;
 }
 
 export class LoginDto {
@@ -40,4 +69,22 @@ export class AuthResponseDto {
     description: 'JWT access token',
   })
   accessToken: string;
+}
+
+export class UpdateUserDto {
+  @ApiProperty({
+    example: '98782435546',
+    description: 'Users phone number',
+  })
+  @IsOptional()
+  @IsString()
+  phoneNumber: string;
+
+  @ApiProperty({
+    example: '123432234gdd',
+    description: 'Users firbase uid',
+  })
+  @IsOptional()
+  @IsString()
+  firbaseId: string;
 }

@@ -17,8 +17,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 409, description: 'Email already exists.' })
   async signup(@Body() createUserDto: CreateUserDto): Promise<AuthResponseDto> {
-    return this.authService.signup(createUserDto.email, createUserDto.password);
+    console.log("first")
+    return this.authService.signup(createUserDto);
   }
+  
 
   @Post('login')
   @ApiOperation({ summary: 'Login in a user' })
