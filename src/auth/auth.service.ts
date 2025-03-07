@@ -2,24 +2,33 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from './auth.dto';
+import { FirebaseService } from 'src/firebase/firebase.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private firebaseService: FirebaseService,
   ) {}
 
-  async signup(
-    email: string,
-    password: string,
-  ): Promise<{ accssToken: string }> {
-    const user = await this.usersService.create(email, password);
-    const payload = { email: user.email, sub: user.id };
+  async signup(createUserDto: CreateUserDto): Promise<any> {
+    console.log(createUserDto);
+    const hashedPassword = bcrypt.hashSync(createUserDto.password, 10);
+    const createFirebaseUser = await this.firebaseService.signup(
+      createUserDto.email,
+      hashedPassword,
+    );
 
-    return {
-      accssToken: this.jwtService.sign(payload),
-    };
+    console.log(createFirebaseUser);
+    const user = await this.usersService.create({
+      ...createUserDto,
+      firbaseId: createFirebaseUser.user.uid,
+    });
+
+    console.log(user);
+    return user;
   }
 
   async login(
