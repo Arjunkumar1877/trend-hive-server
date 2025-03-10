@@ -14,4 +14,7 @@ export class UsersController {
   getProfile() {
     return { message: 'ths is a protected route' };
   }
+
+
+  
 }

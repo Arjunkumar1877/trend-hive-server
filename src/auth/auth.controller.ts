@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthResponseDto, CreateUserDto, LoginDto } from './auth.dto';
+import { Request } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -16,10 +17,17 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 409, description: 'Email already exists.' })
-  async signup(@Body() createUserDto: CreateUserDto): Promise<AuthResponseDto> {
-    console.log("first")
-    return this.authService.signup(createUserDto);
+  async signup(@Body() createUserDto: CreateUserDto, @Req() req: Request): Promise<AuthResponseDto> {
+    console.log("Received signup request");
+  
+    const host = req.get('host');
+    const protocol = req.protocol; 
+    const fullUrl = `${protocol}://${host}`; 
+  
+    return this.authService.signup(createUserDto, fullUrl);
   }
+  
+
   
 
   @Post('login')
