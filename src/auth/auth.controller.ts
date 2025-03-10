@@ -1,7 +1,7 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthResponseDto, CreateUserDto, LoginDto } from './auth.dto';
+import { AuthResponseDto, ConfirmationEmailResponseDto, CreateUserDto, LoginDto } from './auth.dto';
 import { Request } from 'express';
 
 @ApiTags('auth')
@@ -26,8 +26,19 @@ export class AuthController {
   
     return this.authService.signup(createUserDto, fullUrl);
   }
-  
 
+
+  @Post('resend-confirm-email/:id')
+  @ApiOperation({ summary: 'Resend confirmation email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email shared successfully.',
+    type: ConfirmationEmailResponseDto,
+  })
+  async resendConfirmationEmail(@Param('id') id: string, @Req() req: Request) {
+    const fullUrl = `${req.protocol}://${req.get('host')}`;
+    return this.authService.resendConfirmationEmail(id, fullUrl);
+  }
   
 
   @Post('login')

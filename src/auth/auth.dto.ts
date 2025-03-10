@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
@@ -87,4 +88,20 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   firbaseId: string;
+}
+
+export class ConfirmationEmailResponseDto {
+  @ApiProperty({
+    example: 'email shared sucessfully',
+    description: 'shared message'
+  })
+  @IsString()
+  message: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'status'
+  })
+  @IsBoolean()
+  status: boolean;
 }
