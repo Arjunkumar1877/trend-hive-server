@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -47,20 +52,26 @@ export class AuthService {
     }
   }
 
-  async resendConfirmationEmail(id: string, url: string): Promise<ConfirmationEmailResponseDto> {
+  async resendConfirmationEmail(
+    id: string,
+    url: string,
+  ): Promise<ConfirmationEmailResponseDto> {
     const user = await this.usersService.findUserById(id);
     if (!user) throw new NotFoundException('User not found');
-  
-    const token = await createToken({ payload: { id: user.id, email: user.email } });
+
+    const token = await createToken({
+      payload: { id: user.id, email: user.email },
+    });
     const verificationLink = `${url}/confirm-email?token=${token}`;
-  
+
     const emailSent = await sendVerifyMail(user.email, verificationLink);
     return {
-      message: emailSent ? 'Email shared successfully!' : 'Email sharing failed!',
+      message: emailSent
+        ? 'Email shared successfully!'
+        : 'Email sharing failed!',
       status: emailSent,
     };
   }
-  
 
   async login(
     email: string,

@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { User } from './users/user.entity';
 import { config } from 'dotenv';
+import * as path from 'path';
 
-config(); 
+config();
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -12,7 +12,7 @@ export const AppDataSource = new DataSource({
   username: process.env.NEST_DB_USERNAME,
   password: process.env.NEST_DB_PASSWORD,
   database: process.env.NEST_DB_NAME,
-  entities: [User], 
+  entities: [path.join(__dirname, 'data/entities', '**', '*.entity.{ts,js}')],
   synchronize: true,
   logging: true,
 });
