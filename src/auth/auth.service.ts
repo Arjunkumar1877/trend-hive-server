@@ -38,7 +38,7 @@ export class AuthService {
       });
       if (!newUser) throw new Error('Error saving user details');
 
-      const payload = { id: newUser.id, email: newUser.email };
+      const payload = { id: newUser.id, email: newUser.email, firebaseId: user.uid };
       const token = await createToken({ payload });
 
       const verificationLink = `${url}/confirm-email?token=${token}`;

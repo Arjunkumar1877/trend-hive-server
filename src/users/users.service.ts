@@ -7,6 +7,7 @@ import { CreateUserDto, UpdateUserDto } from 'src/auth/auth.dto';
 
 @Injectable()
 export class UsersService {
+  findOneOrFail: any;
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -18,6 +19,10 @@ export class UsersService {
 
   async findUserById(id: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { id: Number(id) } });
+  }
+
+  async findUserByFirebaseId(firebaseId: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { firebaseId: firebaseId } });
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -36,4 +41,6 @@ export class UsersService {
 
     return this.userRepository.save(user);
   }
+
+
 }
