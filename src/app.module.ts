@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
 import { AppDataSource } from './data-source';
 import { FirebaseModule } from './firebase/firebase.module';
+import { AddressModule } from './address/address.module';
 
 config();
 
@@ -21,7 +22,8 @@ config();
     }),
     UsersModule,
     AuthModule,
-    FirebaseModule
+    FirebaseModule,
+    AddressModule
   ],
   controllers: [AppController],
   providers: [
