@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import * as sharp from 'sharp';
+import { EncryptionService } from 'src/helpers/encryption.service';
 
 const imageResizeSelection = (type: string) => {
   switch (type) {
@@ -80,42 +81,4 @@ export const normalizeSpecialCharacters = (input: string): string => {
     .replace(/ß/g, 'ss');
 };
 
-export async function decryptToken(input: {
-  encryptedTokenWithIv: string;
-}): Promise<string> {
-  const { encryptedTokenWithIv } = input;
-  const key = Buffer.from(
-    this.configService.get('ENCRYPTION_KEY') as string,
-    'hex',
-  );
 
-  const iv = Buffer.from(encryptedTokenWithIv.slice(0, 32), 'hex');
-  const encryptedToken = encryptedTokenWithIv.slice(32);
-  const encryptionAlgorithm = this.configService.getOrThrow(
-    'ENCRYPTION_ALGORITHM',
-  );
-
-  const decipher = crypto.createDecipheriv(encryptionAlgorithm, key, iv);
-
-  let decryptedToken = decipher.update(encryptedToken, 'hex', 'utf8');
-  decryptedToken += decipher.final('utf8');
-
-  return decryptedToken;
-}
-
-export async function getIdFromToken(input: {
-  token: string;
-}): Promise<string> {
-  const { token } = input;
-  try {
-    const payload = JSON.parse(
-      await this.decryptToken({ encryptedTokenWithIv: token }),
-    ) satisfies {
-      firebaseId: string;
-      id: string;
-    };
-    return payload.id;
-  } catch (error) {
-    throw new Error('Error decrypting the token.');
-  }
-}

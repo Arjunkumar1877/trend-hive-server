@@ -1,11 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from './auth.dto';
+import { ConfirmationEmailResponseDto, CreateUserDto } from './auth.dto';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { createToken } from 'src/helpers/encrypt';
-import { sendEmailVerification } from 'firebase/auth';
 import { sendVerifyMail } from 'src/helpers/verification-email';
 
 @Injectable()
@@ -19,32 +23,56 @@ export class AuthService {
   async signup(createUserDto: CreateUserDto, url: string): Promise<any> {
     try {
       console.log(createUserDto);
-  
+
       const hashedPassword = bcrypt.hashSync(createUserDto.password, 10);
-  
-      const { user } = await this.firebaseService.signup(createUserDto.email, hashedPassword);
+
+      const { user } = await this.firebaseService.signup(
+        createUserDto.email,
+        hashedPassword,
+      );
       if (!user?.uid) throw new Error('Error creating Firebase user');
-  
+
       const newUser = await this.usersService.create({
         ...createUserDto,
         firbaseId: user.uid,
       });
       if (!newUser) throw new Error('Error saving user details');
-  
-      const payload = { id: newUser.id, email: newUser.email };
+
+      const payload = { id: newUser.id, email: newUser.email, firebaseId: user.uid };
       const token = await createToken({ payload });
-  
+
       const verificationLink = `${url}/confirm-email?token=${token}`;
       const emailSent = await sendVerifyMail(newUser.email, verificationLink);
       if (!emailSent) throw new Error('Error sending verification email');
-  
+
       return newUser.id;
     } catch (error) {
       console.error('Signup Error:', error.message);
       return { success: false, message: error.message };
     }
   }
-  
+
+  async resendConfirmationEmail(
+    id: string,
+    url: string,
+  ): Promise<ConfirmationEmailResponseDto> {
+    const user = await this.usersService.findUserById(id);
+    if (!user) throw new NotFoundException('User not found');
+
+    const token = await createToken({
+      payload: { id: user.id, email: user.email },
+    });
+    const verificationLink = `${url}/confirm-email?token=${token}`;
+
+    const emailSent = await sendVerifyMail(user.email, verificationLink);
+    return {
+      message: emailSent
+        ? 'Email shared successfully!'
+        : 'Email sharing failed!',
+      status: emailSent,
+    };
+  }
+
   async login(
     email: string,
     password: string,

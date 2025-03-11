@@ -1,7 +1,12 @@
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Param, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { AuthResponseDto, CreateUserDto, LoginDto } from './auth.dto';
+import {
+  AuthResponseDto,
+  ConfirmationEmailResponseDto,
+  CreateUserDto,
+  LoginDto,
+} from './auth.dto';
 import { Request } from 'express';
 
 @ApiTags('auth')
@@ -17,18 +22,30 @@ export class AuthController {
     type: AuthResponseDto,
   })
   @ApiResponse({ status: 409, description: 'Email already exists.' })
-  async signup(@Body() createUserDto: CreateUserDto, @Req() req: Request): Promise<AuthResponseDto> {
-    console.log("Received signup request");
-  
+  async signup(
+    @Body() createUserDto: CreateUserDto,
+    @Req() req: Request,
+  ): Promise<AuthResponseDto> {
+    console.log('Received signup request');
+
     const host = req.get('host');
-    const protocol = req.protocol; 
-    const fullUrl = `${protocol}://${host}`; 
-  
+    const protocol = req.protocol;
+    const fullUrl = `${protocol}://${host}`;
+
     return this.authService.signup(createUserDto, fullUrl);
   }
-  
 
-  
+  @Post('resend-confirm-email/:id')
+  @ApiOperation({ summary: 'Resend confirmation email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Email shared successfully.',
+    type: ConfirmationEmailResponseDto,
+  })
+  async resendConfirmationEmail(@Param('id') id: string, @Req() req: Request) {
+    const fullUrl = `${req.protocol}://${req.get('host')}`;
+    return this.authService.resendConfirmationEmail(id, fullUrl);
+  }
 
   @Post('login')
   @ApiOperation({ summary: 'Login in a user' })

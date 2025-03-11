@@ -15,12 +15,12 @@ export class User {
   @Column({ type: 'varchar', nullable: false })
   password: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true }) 
+  @Column({ type: 'varchar', nullable: true, unique: true })
   firebaseId?: string;
 
-  @Column({ type: 'varchar', nullable: true, unique: true }) 
+  @Column({ type: 'varchar', nullable: true, unique: true })
   phoneNumber?: string;
 
-  @OneToMany(() => Address, (address) => address.user, { cascade: true }) 
+  @OneToMany(() => Address, (address) => address.user)
   addresses: Address[];
 }

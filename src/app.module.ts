@@ -8,11 +8,15 @@ import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
 import { AppDataSource } from './data-source';
 import { FirebaseModule } from './firebase/firebase.module';
+import { AddressModule } from './address/address.module';
+import { EncryptionService } from './helpers/encryption.service';
+import { ConfigModule } from '@nestjs/config';
 
 config();
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       useFactory: async () => ({
         ...AppDataSource.options,
@@ -21,7 +25,8 @@ config();
     }),
     UsersModule,
     AuthModule,
-    FirebaseModule
+    FirebaseModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [
@@ -30,6 +35,7 @@ config();
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
+    EncryptionService,
   ],
 })
 export class AppModule {}

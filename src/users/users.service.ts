@@ -7,6 +7,7 @@ import { User } from 'src/data/entities/user.entity';
 
 @Injectable()
 export class UsersService {
+  findOneOrFail: any;
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
@@ -14,6 +15,14 @@ export class UsersService {
 
   async findByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  async findUserById(id: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id: Number(id) } });
+  }
+
+  async findUserByFirebaseId(firebaseId: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { firebaseId: firebaseId } });
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -27,12 +36,11 @@ export class UsersService {
       name: createUserDto.name,
       email: createUserDto.email,
       password: hashedPassword,
-      firebaseId: createUserDto.firbaseId
+      firebaseId: createUserDto.firbaseId,
     });
 
     return this.userRepository.save(user);
   }
 
-  
 
 }
