@@ -45,7 +45,7 @@ export class CreateUserDto {
   })
   @IsOptional()
   @IsString()
-  firbaseId: string;
+  firbaseId?: string;
 }
 
 export class LoginDto {

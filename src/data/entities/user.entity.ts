@@ -22,5 +22,5 @@ export class User {
   phoneNumber?: string;
 
   @OneToMany(() => Address, (address) => address.user)
-  addresses: Address[];
+  addresses?: Address[];
 }
