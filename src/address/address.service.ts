@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UpdateAddressRequestDto } from './address.dto';
-import { Address } from 'src/data/entities/address.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Address } from 'src/data/entities/address.entity';
+import { UpdateAddressRequestDto } from './address.dto';
 import { EncryptionService } from 'src/helpers/encryption.service';
 
 @Injectable()
@@ -18,14 +18,14 @@ export class AddressService {
     const userId = await this.encryptionService.getIdFromToken(tokenInput);
 
     if (!userId) {
-      throw new Error('User Id not found');
+      throw new Error('User ID not found');
     }
 
-    const updatedAddress = this.addressRepository.create({
-      userId: Number(userId),
+    const newAddress = this.addressRepository.create({
       ...input,
+      userId: Number(userId),
     });
 
-    return await this.addressRepository.save(updatedAddress);
+    return await this.addressRepository.save(newAddress);
   }
 }

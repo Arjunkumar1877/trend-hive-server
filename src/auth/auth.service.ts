@@ -41,7 +41,7 @@ export class AuthService {
       const payload = { id: newUser.id, email: newUser.email, firebaseId: user.uid };
       const token = await createToken({ payload });
 
-      const verificationLink = `${url}/confirm-email?token=${token}`;
+      const verificationLink = `${url}/add-details?token=${token}`;
       const emailSent = await sendVerifyMail(newUser.email, verificationLink);
       if (!emailSent) throw new Error('Error sending verification email');
 
@@ -62,7 +62,7 @@ export class AuthService {
     const token = await createToken({
       payload: { id: user.id, email: user.email },
     });
-    const verificationLink = `${url}/confirm-email?token=${token}`;
+    const verificationLink = `${url}/add-details?token=${token}`;
 
     const emailSent = await sendVerifyMail(user.email, verificationLink);
     return {
