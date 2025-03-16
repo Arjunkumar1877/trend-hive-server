@@ -37,6 +37,7 @@ export class UsersService {
       email: createUserDto.email,
       password: hashedPassword,
       firebaseId: createUserDto.firbaseId,
+      phoneNumber: createUserDto.phoneNumber
     });
 
     return this.userRepository.save(user);

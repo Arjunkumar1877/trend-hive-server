@@ -1,5 +1,4 @@
 import {
-  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -11,6 +10,7 @@ import { ConfirmationEmailResponseDto, CreateUserDto } from './auth.dto';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { createToken } from 'src/helpers/encrypt';
 import { sendVerifyMail } from 'src/helpers/verification-email';
+import { getFirebaseErrorMessage } from 'src/helpers/error';
 
 @Injectable()
 export class AuthService {
@@ -20,9 +20,8 @@ export class AuthService {
     private firebaseService: FirebaseService,
   ) {}
 
-  async signup(createUserDto: CreateUserDto, url: string): Promise<any> {
+  async signup(createUserDto: CreateUserDto): Promise<any> {
     try {
-      console.log(createUserDto);
 
       const hashedPassword = bcrypt.hashSync(createUserDto.password, 10);
 
@@ -32,8 +31,13 @@ export class AuthService {
       );
       if (!user?.uid) throw new Error('Error creating Firebase user');
 
+      console.log(createUserDto.phoneNumber)
       const newUser = await this.usersService.create({
-        ...createUserDto,
+        email: createUserDto.email,
+        password: hashedPassword,
+        name: createUserDto.name,
+        phoneNumber: createUserDto.phoneNumber,
+        isEmailVerified: false,
         firbaseId: user.uid,
       });
       if (!newUser) throw new Error('Error saving user details');
@@ -41,20 +45,19 @@ export class AuthService {
       const payload = { id: newUser.id, email: newUser.email, firebaseId: user.uid };
       const token = await createToken({ payload });
 
-      const verificationLink = `${url}/add-details?token=${token}`;
+      const verificationLink = `${process.env.NEST_CLIENT_LINK}/add-details?token=${token}`;
       const emailSent = await sendVerifyMail(newUser.email, verificationLink);
       if (!emailSent) throw new Error('Error sending verification email');
 
-      return newUser.id;
+      return  { success: true, message: 'Email sent succesfully to your email. Please confirm.', userId: newUser.id };
     } catch (error) {
-      console.error('Signup Error:', error.message);
-      return { success: false, message: error.message };
+      const errorMessage = getFirebaseErrorMessage(error);
+      return { success: false, message: errorMessage };
     }
   }
 
   async resendConfirmationEmail(
     id: string,
-    url: string,
   ): Promise<ConfirmationEmailResponseDto> {
     const user = await this.usersService.findUserById(id);
     if (!user) throw new NotFoundException('User not found');
@@ -62,7 +65,7 @@ export class AuthService {
     const token = await createToken({
       payload: { id: user.id, email: user.email },
     });
-    const verificationLink = `${url}/add-details?token=${token}`;
+    const verificationLink = `${process.env.NEST_CLIENT_LINK}/add-details?token=${token}`;
 
     const emailSent = await sendVerifyMail(user.email, verificationLink);
     return {
@@ -85,7 +88,7 @@ export class AuthService {
     const payload = { email: user.email, sub: user.id };
 
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload)
     };
   }
 }

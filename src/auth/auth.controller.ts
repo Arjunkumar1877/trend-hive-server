@@ -7,7 +7,6 @@ import {
   CreateUserDto,
   LoginDto,
 } from './auth.dto';
-import { Request } from 'express';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -24,15 +23,9 @@ export class AuthController {
   @ApiResponse({ status: 409, description: 'Email already exists.' })
   async signup(
     @Body() createUserDto: CreateUserDto,
-    @Req() req: Request,
   ): Promise<AuthResponseDto> {
     console.log('Received signup request');
-
-    const host = req.get('host');
-    const protocol = req.protocol;
-    const fullUrl = `${protocol}://${host}`;
-
-    return this.authService.signup(createUserDto, fullUrl);
+    return this.authService.signup(createUserDto);
   }
 
   @Post('resend-confirm-email/:id')
@@ -42,9 +35,8 @@ export class AuthController {
     description: 'Email shared successfully.',
     type: ConfirmationEmailResponseDto,
   })
-  async resendConfirmationEmail(@Param('id') id: string, @Req() req: Request) {
-    const fullUrl = `${req.protocol}://${req.get('host')}`;
-    return this.authService.resendConfirmationEmail(id, fullUrl);
+  async resendConfirmationEmail(@Param('id') id: string) {
+    return this.authService.resendConfirmationEmail(id);
   }
 
   @Post('login')
