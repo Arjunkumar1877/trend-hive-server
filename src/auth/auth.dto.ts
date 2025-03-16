@@ -32,10 +32,18 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty({
+    example: false,
+    description: 'Email is verified or not',
+  })
+  @IsBoolean()
+  @IsOptional()
+  isEmailVerified: boolean;
+
+  @ApiProperty({
     example: '98782435546',
     description: 'Users phone number',
   })
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   phoneNumber: string;
 

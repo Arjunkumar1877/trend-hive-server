@@ -1,4 +1,4 @@
-export function getErrorMessage(error) {
+export function getFirebaseErrorMessage(error: { message: string; code: string; }) {
     console.log('Error object:', error);
 
     const errorMessage = error.message || error.code || 'An unknown error occurred. Please try again later.';
@@ -22,7 +22,15 @@ export function getErrorMessage(error) {
     } else if (errorMessage.includes('auth/account-exists-with-different-credential')) {
         return 'An account already exists with the same email address, but with a different sign-in provider. Please use a different provider to log in.';
     } else {
-        // Return the default message if it's not one of the known errors
         return `Error: ${errorMessage}. Please try again later.`;
     }
 }
+
+
+
+export function isFirebaseError(error: unknown): error is { message: string; code: string } {
+    return (
+      typeof (error as { message?: string; code?: string }).message === 'string' &&
+      typeof (error as { message?: string; code?: string }).code === 'string'
+    );
+  }
