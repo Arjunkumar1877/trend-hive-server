@@ -11,6 +11,7 @@ import { ConfirmationEmailResponseDto, CreateUserDto } from './auth.dto';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { createToken } from 'src/helpers/encrypt';
 import { sendVerifyMail } from 'src/helpers/verification-email';
+import { getErrorMessage } from 'src/helpers/error';
 
 @Injectable()
 export class AuthService {
@@ -45,10 +46,10 @@ export class AuthService {
       const emailSent = await sendVerifyMail(newUser.email, verificationLink);
       if (!emailSent) throw new Error('Error sending verification email');
 
-      return newUser.id;
+      return  { success: false, message: 'Email sent sucefully to your email. Please confirm.', userId: newUser.id };;
     } catch (error) {
-      console.error('Signup Error:', error.message);
-      return { success: false, message: error.message };
+      const errorMessage = getErrorMessage(error);
+      return { success: false, message: errorMessage };
     }
   }
 
