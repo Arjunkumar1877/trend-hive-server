@@ -22,7 +22,7 @@ export class AuthService {
     private firebaseService: FirebaseService,
   ) {}
 
-  async signup(createUserDto: CreateUserDto): Promise<any> {
+  async signup(createUserDto: CreateUserDto){
     try {
       const hashedPassword = bcrypt.hashSync(createUserDto.password, 10);
 
@@ -52,7 +52,12 @@ export class AuthService {
 
       const verificationLink = `${process.env.NEST_CLIENT_LINK}/add-details?token=${token}`;
       const emailSent = await sendVerifyMail(newUser.email, verificationLink);
-      if (!emailSent) throw new Error('Error sending verification email');
+      if (!emailSent){
+        return {
+          success: false,
+          message: 'Email sharing failed !',
+        };
+      }
 
       return {
         success: true,

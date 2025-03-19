@@ -22,7 +22,7 @@ export class User {
   phoneNumber: string;
 
   @Column({ type: 'boolean', default: false })
-  isEmailVerified?: string;
+  isEmailVerified?: boolean;
 
   @OneToMany(() => Address, (address) => address.user)
   addresses?: Address[];

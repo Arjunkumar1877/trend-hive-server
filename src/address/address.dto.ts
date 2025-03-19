@@ -3,32 +3,30 @@ import { IsOptional, IsString, IsBoolean } from 'class-validator';
 
 export class UpdateAddressRequestDto {
   @ApiPropertyOptional({ description: 'Street address of the user', example: '123 Main St' })
-  @IsOptional()
   @IsString()
-  address?: string;
+  address: string;
 
-  @ApiPropertyOptional({ description: 'City of the address', example: 'New York' })
-  @IsOptional()
+  @ApiPropertyOptional({ description: 'City of the user', example: 'New York' })
   @IsString()
-  city?: string;
+  city: string;
 
-  @ApiPropertyOptional({ description: 'State of the address', example: 'NY' })
-  @IsOptional()
+  @ApiPropertyOptional({ description: 'State of the user', example: 'NY' })
   @IsString()
-  state?: string;
+  state: string;
 
-  @ApiPropertyOptional({ description: 'ZIP code of the address', example: '10001' })
-  @IsOptional()
+  @ApiPropertyOptional({ description: 'ZIP code of the user', example: '10001' })
   @IsString()
-  zipCode?: string;
+  zipCode: string;
 
-  @ApiPropertyOptional({ description: 'Phone number associated with the address', example: '+1-555-123-4567' })
-  @IsOptional()
+  @ApiPropertyOptional({ description: 'country of the user', example: 'India' })
   @IsString()
-  phoneNumber?: string;
+  country: string;
 
-  @ApiPropertyOptional({ description: 'Indicates if this is the default address', example: true })
-  @IsOptional()
+  @ApiPropertyOptional({ description: 'Phone number associated with the user', example: '+1-555-123-4567' })
+  @IsString()
+  phoneNumber: string;
+
+  @ApiPropertyOptional({ description: 'Indicates if this is the default user', example: true })
   @IsBoolean()
-  isDefault?: boolean;
+  isDefault: boolean;
 }

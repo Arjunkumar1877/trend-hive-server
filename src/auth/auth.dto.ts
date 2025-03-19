@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   MinLength,
@@ -72,13 +73,29 @@ export class LoginDto {
   @IsString()
   password: string;
 }
-
 export class AuthResponseDto {
   @ApiProperty({
-    example: 'jwt-token-here',
-    description: 'JWT access token',
+    example: 'Login',
+    description: 'Success or not',
   })
-  accessToken: string;
+  @IsBoolean()
+  success: boolean;
+
+  @ApiProperty({
+    example: 'Email sent message',
+    description: 'Email shared successfully',
+  })
+  @IsString()
+  message: string;
+
+  @ApiProperty({
+    example: 12345,
+    description: 'User ID (optional)',
+    required: false, 
+  })
+  @IsOptional()
+  @IsNumber()
+  userId?: number;
 }
 
 export class UpdateUserDto {
