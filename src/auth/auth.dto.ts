@@ -7,6 +7,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserDto } from 'src/users/user.dto';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -101,15 +102,37 @@ export class UpdateUserDto {
 export class ConfirmationEmailResponseDto {
   @ApiProperty({
     example: 'email shared sucessfully',
-    description: 'shared message'
+    description: 'shared message',
   })
   @IsString()
   message: string;
 
   @ApiProperty({
     example: true,
-    description: 'status'
+    description: 'status',
   })
   @IsBoolean()
   status: boolean;
+}
+
+export class CheckUserResponseDto {
+  @ApiProperty({
+    example: 'User details',
+    description: 'shared message',
+  })
+  data: UserDto | string;
+
+  @ApiProperty({
+    example: 'Email is verified',
+    description: 'email is verified',
+  })
+  @IsString()
+  message: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'status',
+  })
+  @IsBoolean()
+  verified: boolean;
 }
