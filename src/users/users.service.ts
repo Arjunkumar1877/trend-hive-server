@@ -43,5 +43,11 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-
+  async updateVerifyUser(id: number) {
+    return this.userRepository.update(
+      { id }, // Where condition
+      { isEmailVerified: true } // Update fields
+    );
+  }
+  
 }

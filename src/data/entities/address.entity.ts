@@ -1,4 +1,10 @@
-import { Entity, Column, ManyToOne, JoinColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 
 @Entity()
@@ -24,6 +30,9 @@ export class Address {
 
   @Column({ type: 'varchar', length: 20 })
   zipCode: string;
+
+  @Column({ type: 'varchar', length: 20 })
+  country: string;
 
   @Column({ type: 'varchar', nullable: true })
   phoneNumber?: string;

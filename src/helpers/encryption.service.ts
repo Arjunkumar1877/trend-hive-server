@@ -34,7 +34,7 @@ export class EncryptionService {
     }
   }
 
-  async getIdFromToken(input: { token: string }): Promise<string> {
+  async getIdsFromToken(input: { token: string }): Promise<{firebaseId: string, id: string}> {
     try {
       const decrypted = await this.decryptToken({ encryptedTokenWithIv: input.token });
       const payload = JSON.parse(decrypted) as { firebaseId: string; id: string };
@@ -43,7 +43,7 @@ export class EncryptionService {
         throw new Error('User ID missing in decrypted token.');
       }
 
-      return payload.id;
+      return payload;
     } catch (error) {
       console.error('Token decryption failed:', error);
       throw new Error('Error decrypting the token.');
