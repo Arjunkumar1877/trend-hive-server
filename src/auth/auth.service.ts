@@ -112,7 +112,7 @@ export class AuthService {
       const payload = { id: data.id, email: data.email };
       const token = await createToken({ payload });
 
-      const verificationLink = `${process.env.NEST_CLIENT_LINK}/add-details?token=${token}`;
+      const verificationLink = `/add-details?token=${token}`;
       return {
         data: verificationLink,
         verified: false,

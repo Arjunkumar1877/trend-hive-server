@@ -22,7 +22,6 @@ export class AuthController {
     description: 'User created',
     type: AuthResponseDto,
   })
-  @ApiResponse({ status: 409, description: 'Email already exists.' })
   async signup(@Body() createUserDto: CreateUserDto): Promise<AuthResponseDto> {
     console.log('Received signup request');
     return this.authService.signup(createUserDto);
@@ -46,7 +45,6 @@ export class AuthController {
     description: 'Login successful',
     type: AuthResponseDto,
   })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto.email, loginDto.password);
   }
@@ -58,8 +56,7 @@ export class AuthController {
     description: 'User Verified',
     type: CheckUserResponseDto,
   })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async checkUser(@Param('firebaseId') firebaseId: string) {
-    return this.authService.checkUserIsVerified(firebaseId);
+    return this.authService.checkUserIsVerified(firebaseId); 
   }
 }
