@@ -11,6 +11,7 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { AddressModule } from './address/address.module';
 import { EncryptionService } from './helpers/encryption.service';
 import { ConfigModule } from '@nestjs/config';
+import { AdminModule } from './admin/admin.module';
 
 config();
 
@@ -27,6 +28,7 @@ config();
     AuthModule,
     FirebaseModule,
     AddressModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

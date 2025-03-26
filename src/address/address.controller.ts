@@ -15,11 +15,6 @@ export class AddressController {
        description: 'Returns the updated partial user entity',
        type: PartialType(User)
     })
-      @ApiResponse({
-        status: 200,
-        description: 'updated address successfully.',
-        type: '',
-      })
     updateUserDetails(
        @Body() body: UpdateAddressRequestDto,
        @Param('token') token: string

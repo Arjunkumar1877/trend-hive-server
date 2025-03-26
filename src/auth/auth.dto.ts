@@ -2,11 +2,13 @@ import {
   IsBoolean,
   IsEmail,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserDto } from 'src/users/user.dto';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -71,13 +73,29 @@ export class LoginDto {
   @IsString()
   password: string;
 }
-
 export class AuthResponseDto {
   @ApiProperty({
-    example: 'jwt-token-here',
-    description: 'JWT access token',
+    example: 'Login',
+    description: 'Success or not',
   })
-  accessToken: string;
+  @IsBoolean()
+  success: boolean;
+
+  @ApiProperty({
+    example: 'Email sent message',
+    description: 'Email shared successfully',
+  })
+  @IsString()
+  message: string;
+
+  @ApiProperty({
+    example: 12345,
+    description: 'User ID (optional)',
+    required: false, 
+  })
+  @IsOptional()
+  @IsNumber()
+  userId?: number;
 }
 
 export class UpdateUserDto {
@@ -101,15 +119,37 @@ export class UpdateUserDto {
 export class ConfirmationEmailResponseDto {
   @ApiProperty({
     example: 'email shared sucessfully',
-    description: 'shared message'
+    description: 'shared message',
   })
   @IsString()
   message: string;
 
   @ApiProperty({
     example: true,
-    description: 'status'
+    description: 'status',
   })
   @IsBoolean()
   status: boolean;
+}
+
+export class CheckUserResponseDto {
+  @ApiProperty({
+    example: 'User details',
+    description: 'shared message',
+  })
+  data: UserDto | string;
+
+  @ApiProperty({
+    example: 'Email is verified',
+    description: 'email is verified',
+  })
+  @IsString()
+  message: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'status',
+  })
+  @IsBoolean()
+  verified: boolean;
 }

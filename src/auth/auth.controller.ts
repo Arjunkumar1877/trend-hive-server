@@ -1,12 +1,14 @@
-import { Body, Controller, Param, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   AuthResponseDto,
+  CheckUserResponseDto,
   ConfirmationEmailResponseDto,
   CreateUserDto,
   LoginDto,
 } from './auth.dto';
+import { UserDto } from 'src/users/user.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -20,10 +22,7 @@ export class AuthController {
     description: 'User created',
     type: AuthResponseDto,
   })
-  @ApiResponse({ status: 409, description: 'Email already exists.' })
-  async signup(
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<AuthResponseDto> {
+  async signup(@Body() createUserDto: CreateUserDto): Promise<AuthResponseDto> {
     console.log('Received signup request');
     return this.authService.signup(createUserDto);
   }
@@ -46,8 +45,18 @@ export class AuthController {
     description: 'Login successful',
     type: AuthResponseDto,
   })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto.email, loginDto.password);
+  }
+
+  @Get('check-user/:firebaseId')
+  @ApiOperation({ summary: 'Check if the user is verified or not' })
+  @ApiResponse({
+    status: 200,
+    description: 'User Verified',
+    type: CheckUserResponseDto,
+  })
+  async checkUser(@Param('firebaseId') firebaseId: string) {
+    return this.authService.checkUserIsVerified(firebaseId); 
   }
 }

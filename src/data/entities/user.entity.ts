@@ -15,16 +15,14 @@ export class User {
   @Column({ type: 'varchar', nullable: false })
   password: string;
 
-  @Column({ type: 'varchar',  unique: true })
-  firebaseId?: string;
+  @Column({ type: 'varchar', unique: true })
+  firebaseId: string;
 
-  @Column({ type: 'varchar', nullable: false }) 
+  @Column({ type: 'varchar', nullable: false })
   phoneNumber: string;
-  
 
   @Column({ type: 'boolean', default: false })
-  isEmailVerified?: string;
-
+  isEmailVerified?: boolean;
 
   @OneToMany(() => Address, (address) => address.user)
   addresses?: Address[];
