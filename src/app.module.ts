@@ -12,6 +12,7 @@ import { AddressModule } from './address/address.module';
 import { EncryptionService } from './helpers/encryption.service';
 import { ConfigModule } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
+import { ProductsModule } from './products/products.module';
 
 config();
 
@@ -29,6 +30,7 @@ config();
     FirebaseModule,
     AddressModule,
     AdminModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [
