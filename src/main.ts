@@ -21,9 +21,12 @@ async function bootstrap() {
       'JWT-auth',
     )
     .build();
+     
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api-docs', app, document, {
+    jsonDocumentUrl: 'api-docs/trend-hive'
+  });
 
   await app.listen(8000);
 }
