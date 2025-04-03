@@ -1,33 +1,33 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  app.enableCors({
-    origin: 'http://localhost:3000',
-    methods: 'GET, HEAD, PUT, POST, PATCH, DELETE',
-    allowedHeaders: 'Content-Type, Authorization',
-    credentials: true,
-  });
-
+  
+  // Enable CORS
+  app.enableCors();
+  
+  // Enable validation with transform
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+  
+  // Setup Swagger
   const config = new DocumentBuilder()
-    .setTitle('Trend-hive-api')
-    .setDescription('API documentation for the trend-hive-api')
+    .setTitle('Trend Hive API')
+    .setDescription('The Trend Hive API description')
     .setVersion('1.0')
-    .addBearerAuth(
-      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
-      'JWT-auth',
-    )
+    .addBearerAuth()
     .build();
-     
-
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document, {
-    jsonDocumentUrl: 'api-docs/trend-hive'
-  });
-
-  await app.listen(8000);
+  SwaggerModule.setup('api', app, document);
+  
+  await app.listen(3000);
 }
 bootstrap();

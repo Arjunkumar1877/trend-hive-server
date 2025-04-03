@@ -18,7 +18,7 @@ import { Image } from './image.entity';
     @Column({ type: 'varchar' })
     name: string;
   
-    @Column({ type: 'int' })
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
     price: number;
   
     @Column({ type: 'varchar' })
