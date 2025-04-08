@@ -58,4 +58,10 @@ export class UpdateProductDto {
   @IsArray()
   @IsOptional()
   images?: string[];
+}
+
+export class AddImagesToProductDto {
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  imageUrls: string[];
 } 

@@ -5,6 +5,7 @@ import { Product } from '../data/entities/product.entity';
 import { Category } from '../data/entities/category.entity';
 import { Image } from '../data/entities/image.entity';
 import { CreateProductDto, UpdateProductDto } from './product.dto';
+import { FirebaseStorageService } from '../firebase/firebase-storage.service';
 
 @Injectable()
 export class ProductsService {
@@ -15,6 +16,7 @@ export class ProductsService {
     private categoryRepository: Repository<Category>,
     @InjectRepository(Image)
     private imageRepository: Repository<Image>,
+    private firebaseStorageService: FirebaseStorageService,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -36,6 +38,7 @@ export class ProductsService {
 
     const savedProduct = await this.productRepository.save(product);
 
+    // If image URLs are provided, create image entities
     if (createProductDto.images && createProductDto.images.length > 0) {
       const images = createProductDto.images.map((imageUrl, index) =>
         this.imageRepository.create({
@@ -87,7 +90,7 @@ export class ProductsService {
       // Delete existing images
       await this.imageRepository.delete({ product: { id } });
 
-      // Create new images
+      // Create new images with the provided URLs
       const images = updateProductDto.images.map((imageUrl, index) =>
         this.imageRepository.create({
           image: imageUrl,
@@ -98,12 +101,57 @@ export class ProductsService {
       await this.imageRepository.save(images);
     }
 
-    Object.assign(product, updateProductDto);
+    // Update other product properties
+    if (updateProductDto.name) product.name = updateProductDto.name;
+    if (updateProductDto.price) product.price = updateProductDto.price;
+    if (updateProductDto.description) product.description = updateProductDto.description;
+    if (updateProductDto.availableQuantity !== undefined) {
+      product.availableQuantity = updateProductDto.availableQuantity;
+    }
+
     return this.productRepository.save(product);
   }
 
   async remove(id: number): Promise<void> {
     const product = await this.findOne(id);
     await this.productRepository.remove(product);
+  }
+
+  /**
+   * Upload product images to Firebase Storage
+   * @param files - Array of files to upload
+   * @returns Promise<string[]> - Array of download URLs for the uploaded images
+   */
+  async uploadProductImages(files: any[]): Promise<string[]> {
+    try {
+      // Upload files to the 'products' folder in Firebase Storage
+      const imageUrls = await this.firebaseStorageService.uploadMultipleFiles(files, 'products');
+      return imageUrls;
+    } catch (error) {
+      throw new Error(`Failed to upload product images: ${error.message}`);
+    }
+  }
+
+  /**
+   * Add images to an existing product
+   * @param productId - ID of the product to add images to
+   * @param imageUrls - Array of image URLs to add
+   * @returns Promise<Product> - The updated product
+   */
+  async addImagesToProduct(productId: number, imageUrls: string[]): Promise<Product> {
+    const product = await this.findOne(productId);
+    
+    // Create new images with the provided URLs
+    const images = imageUrls.map((imageUrl, index) =>
+      this.imageRepository.create({
+        image: imageUrl,
+        product,
+        isCover: index === 0 && product.images.length === 0, // Set as cover if it's the first image
+      } as Image),
+    );
+    
+    await this.imageRepository.save(images);
+    
+    return this.findOne(productId);
   }
 }
