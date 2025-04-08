@@ -35,6 +35,14 @@ export class FirebaseService {
   }
 
   /**
+   * Get the Firebase app instance
+   * @returns FirebaseApp
+   */
+  getFirebaseApp(): FirebaseApp {
+    return this.firebaseApp;
+  }
+
+  /**
    * Sign up a user in Firebase Authentication
    * @param email - User's email
    * @param password - User's password

@@ -7,7 +7,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserDto } from 'src/users/user.dto';
 
 export class CreateUserDto {
@@ -53,6 +53,7 @@ export class CreateUserDto {
     example: '123432234gdd',
     description: 'Users firbase uid',
   })
+  @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   firbaseId?: string;
