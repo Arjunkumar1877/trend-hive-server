@@ -1,69 +1,62 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Product } from '../data/entities/product.entity';
-import { Category } from '../data/entities/category.entity';
-import { Image } from '../data/entities/image.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Product, ProductDocument } from '../data/schemas/product.schema';
+import { Category, CategoryDocument } from '../data/schemas/category.schema';
+import { Image, ImageDocument } from '../data/schemas/image.schema';
 import { CreateProductDto, UpdateProductDto } from './product.dto';
 import { FirebaseStorageService } from '../firebase/firebase-storage.service';
 
 @Injectable()
 export class ProductsService {
   constructor(
-    @InjectRepository(Product)
-    private productRepository: Repository<Product>,
-    @InjectRepository(Category)
-    private categoryRepository: Repository<Category>,
-    @InjectRepository(Image)
-    private imageRepository: Repository<Image>,
+    @InjectModel(Product.name)
+    private productModel: Model<ProductDocument>,
+    @InjectModel(Category.name)
+    private categoryModel: Model<CategoryDocument>,
+    @InjectModel(Image.name)
+    private imageModel: Model<ImageDocument>,
     private firebaseStorageService: FirebaseStorageService,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
-    const category = await this.categoryRepository.findOne({
-      where: { id: createProductDto.categoryId },
-    });
+  async create(createProductDto: CreateProductDto): Promise<ProductDocument> {
+    const category = await this.categoryModel.findById(createProductDto.categoryId).exec();
 
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
-    const product = this.productRepository.create({
+    const product = new this.productModel({
       name: createProductDto.name,
       price: createProductDto.price,
       description: createProductDto.description,
       availableQuantity: createProductDto.availableQuantity,
-      category,
-    } as Product);
+      category: category._id,
+    });
 
-    const savedProduct = await this.productRepository.save(product);
+    const savedProduct = await product.save();
 
     // If image URLs are provided, create image entities
     if (createProductDto.images && createProductDto.images.length > 0) {
       const images = createProductDto.images.map((imageUrl, index) =>
-        this.imageRepository.create({
+        new this.imageModel({
           image: imageUrl,
-          product: savedProduct,
+          product: savedProduct._id,
           isCover: index === 0,
-        } as Image),
+        }),
       );
-      await this.imageRepository.save(images);
+      await this.imageModel.insertMany(images);
     }
 
-    return this.findOne(savedProduct.id);
+    return this.findOne(savedProduct._id.toString());
   }
 
-  async findAll(): Promise<Product[]> {
-    return this.productRepository.find({
-      relations: ['category', 'images'],
-    });
+  async findAll(): Promise<ProductDocument[]> {
+    return this.productModel.find().populate('category').populate('images').exec();
   }
 
-  async findOne(id: number): Promise<Product> {
-    const product = await this.productRepository.findOne({
-      where: { id },
-      relations: ['category', 'images'],
-    });
+  async findOne(id: string): Promise<ProductDocument> {
+    const product = await this.productModel.findById(id).populate('category').populate('images').exec();
 
     if (!product) {
       throw new NotFoundException('Product not found');
@@ -72,33 +65,31 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<ProductDocument> {
     const product = await this.findOne(id);
 
     if (updateProductDto.categoryId) {
-      const category = await this.categoryRepository.findOne({
-        where: { id: updateProductDto.categoryId },
-      });
+      const category = await this.categoryModel.findById(updateProductDto.categoryId).exec();
 
       if (!category) {
         throw new NotFoundException('Category not found');
       }
-      product.category = category;
+      product.category = category._id;
     }
 
     if (updateProductDto.images && updateProductDto.images.length > 0) {
       // Delete existing images
-      await this.imageRepository.delete({ product: { id } });
+      await this.imageModel.deleteMany({ product: product._id }).exec();
 
       // Create new images with the provided URLs
       const images = updateProductDto.images.map((imageUrl, index) =>
-        this.imageRepository.create({
+        new this.imageModel({
           image: imageUrl,
-          product,
+          product: product._id,
           isCover: index === 0,
-        } as Image),
+        }),
       );
-      await this.imageRepository.save(images);
+      await this.imageModel.insertMany(images);
     }
 
     // Update other product properties
@@ -109,12 +100,14 @@ export class ProductsService {
       product.availableQuantity = updateProductDto.availableQuantity;
     }
 
-    return this.productRepository.save(product);
+    return product.save();
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const product = await this.findOne(id);
-    await this.productRepository.remove(product);
+    // Delete associated images
+    await this.imageModel.deleteMany({ product: product._id }).exec();
+    await product.deleteOne();
   }
 
   /**
@@ -136,21 +129,21 @@ export class ProductsService {
    * Add images to an existing product
    * @param productId - ID of the product to add images to
    * @param imageUrls - Array of image URLs to add
-   * @returns Promise<Product> - The updated product
+   * @returns Promise<ProductDocument> - The updated product
    */
-  async addImagesToProduct(productId: number, imageUrls: string[]): Promise<Product> {
+  async addImagesToProduct(productId: string, imageUrls: string[]): Promise<ProductDocument> {
     const product = await this.findOne(productId);
     
     // Create new images with the provided URLs
     const images = imageUrls.map((imageUrl, index) =>
-      this.imageRepository.create({
+      new this.imageModel({
         image: imageUrl,
-        product,
-        isCover: index === 0 && product.images.length === 0, // Set as cover if it's the first image
-      } as Image),
+        product: product._id,
+        isCover: index === 0 && (!product.images || product.images.length === 0), // Set as cover if it's the first image
+      }),
     );
     
-    await this.imageRepository.save(images);
+    await this.imageModel.insertMany(images);
     
     return this.findOne(productId);
   }

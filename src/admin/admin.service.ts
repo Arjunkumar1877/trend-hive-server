@@ -1,20 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Admin } from 'src/data/entities/admin.entity';
-import { Repository } from 'typeorm';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Admin, AdminDocument } from 'src/data/schemas/admin.schema';
 import { AdminLoginDto, AdminLoginResponseDto, toAdminDto } from './admin.dto';
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectRepository(Admin)
-    private adminRepository: Repository<Admin>,
+    @InjectModel(Admin.name)
+    private adminModel: Model<AdminDocument>,
   ) {}
 
-  async findByEmail(email: string): Promise<Admin | null> {
-    return this.adminRepository.findOne({
-      where: { email: email }, 
-    });
+  async findByEmail(email: string): Promise<AdminDocument | null> {
+    return this.adminModel.findOne({ email }).exec();
   }
   
   async login(adminLoginDto: AdminLoginDto): Promise<AdminLoginResponseDto | string> {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Address } from 'src/data/entities/address.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Address, AddressDocument } from 'src/data/schemas/address.schema';
 import { UpdateAddressRequestDto } from './address.dto';
 import { EncryptionService } from 'src/helpers/encryption.service';
 import { UsersService } from 'src/users/users.service';
@@ -9,8 +9,8 @@ import { UsersService } from 'src/users/users.service';
 @Injectable()
 export class AddressService {
   constructor(
-    @InjectRepository(Address)
-    private addressRepository: Repository<Address>,
+    @InjectModel(Address.name)
+    private addressModel: Model<AddressDocument>,
     private encryptionService: EncryptionService,
     private userService: UsersService,
   ) {}
@@ -23,15 +23,15 @@ export class AddressService {
       throw new Error('User ID not found');
     }
 
-    const newAddress = this.addressRepository.create({
+    const newAddress = new this.addressModel({
       ...input,
-      userId: Number(userId.id),
+      userId: userId.id,
     });
 
-    const verifyEmail = await this.userService.updateVerifyUser(+userId.id);
+    const verifyEmail = await this.userService.updateVerifyUser(userId.id);
     if (!verifyEmail) {
       throw new Error('Error verifying the email');
     }
-    return await this.addressRepository.save(newAddress);
+    return await newAddress.save();
   }
 }

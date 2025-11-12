@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseInterceptors, UploadedFiles, UploadedFile, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, UploadedFile, Query, BadRequestException } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto, UpdateProductDto, AddImagesToProductDto } from './product.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
-import { Product } from '../data/entities/product.entity';
+import { Product } from '../data/schemas/product.schema';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('products')
@@ -59,7 +59,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Add images to an existing product' })
   @ApiResponse({ status: 200, description: 'Images added to product successfully', type: Product })
   async addImagesToProduct(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() addImagesDto: AddImagesToProductDto,
   ) {
     return this.productsService.addImagesToProduct(id, addImagesDto.imageUrls);
@@ -75,7 +75,7 @@ export class ProductsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a product by id' })
   @ApiResponse({ status: 200, description: 'Return the product', type: Product })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id') id: string) {
     return this.productsService.findOne(id);
   }
 
@@ -83,7 +83,7 @@ export class ProductsController {
   @ApiOperation({ summary: 'Update a product' })
   @ApiResponse({ status: 200, description: 'Product updated successfully', type: Product })
   update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id') id: string,
     @Body() updateProductDto: UpdateProductDto,
   ) {
     return this.productsService.update(id, updateProductDto);
@@ -92,7 +92,7 @@ export class ProductsController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a product' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id') id: string) {
     return this.productsService.remove(id);
   }
 }

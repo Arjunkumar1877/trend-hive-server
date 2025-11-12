@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { AddressService } from './address.service';
 import { AddressController } from './address.controller';
-import { Address } from 'src/data/entities/address.entity';
+import { Address, AddressSchema } from 'src/data/schemas/address.schema';
 import { UsersModule } from 'src/users/users.module';
 import { EncryptionService } from 'src/helpers/encryption.service';
 
 @Module({
-  imports: [UsersModule, TypeOrmModule.forFeature([Address])],
+  imports: [
+    UsersModule,
+    MongooseModule.forFeature([{ name: Address.name, schema: AddressSchema }]),
+  ],
   controllers: [AddressController],
   providers: [AddressService, EncryptionService],
   exports: [AddressService],

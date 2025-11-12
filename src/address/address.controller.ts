@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Patch } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiResponse, PartialType } from '@nestjs/swagger';
-import { User } from 'src/data/entities/user.entity';
+import { User } from 'src/data/schemas/user.schema';
 import { UpdateAddressRequestDto } from './address.dto';
 import { AddressService } from './address.service';
 

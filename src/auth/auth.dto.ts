@@ -90,13 +90,13 @@ export class AuthResponseDto {
   message: string;
 
   @ApiProperty({
-    example: 12345,
+    example: '507f1f77bcf86cd799439011',
     description: 'User ID (optional)',
     required: false, 
   })
   @IsOptional()
-  @IsNumber()
-  userId?: number;
+  @IsString()
+  userId?: string;
 }
 
 export class UpdateUserDto {
