@@ -12,7 +12,7 @@ import { createToken } from 'src/helpers/encrypt';
 import { sendVerifyMail } from 'src/helpers/verification-email';
 import { getFirebaseErrorMessage } from 'src/helpers/error';
 import { toUserDto } from 'src/users/user.dto';
-import { User } from 'src/data/entities';
+import { User, UserDocument } from 'src/data/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
@@ -44,7 +44,7 @@ export class AuthService {
       if (!newUser) throw new Error('Error saving user details');
 
       const payload = {
-        id: newUser.id,
+        id: newUser._id.toString(),
         email: newUser.email,
         firebaseId: user.uid,
       };
@@ -62,7 +62,7 @@ export class AuthService {
       return {
         success: true,
         message: 'Email sent succesfully to your email. Please confirm.',
-        userId: newUser.id,
+        userId: newUser._id.toString(),
       };
     } catch (error) {
       const errorMessage = getFirebaseErrorMessage(error);
@@ -77,7 +77,7 @@ export class AuthService {
     if (!user) throw new NotFoundException('User not found');
 
     const token = await createToken({
-      payload: { id: user.id, email: user.email },
+      payload: { id: user._id.toString(), email: user.email },
     });
     const verificationLink = `${process.env.NEST_CLIENT_LINK}/add-details?token=${token}`;
 
@@ -99,7 +99,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials!');
     }
 
-    const payload = { email: user.email, sub: user.id };
+    const payload = { email: user.email, sub: user._id.toString() };
 
     return {
       accessToken: this.jwtService.sign(payload),
@@ -109,7 +109,7 @@ export class AuthService {
   async checkUserIsVerified(firebaseId: string) {
     const data = await this.usersService.findUserByFirebaseId(firebaseId);
     if (data && !data?.isEmailVerified) {
-      const payload = { id: data.id, email: data.email };
+      const payload = { id: data._id.toString(), email: data.email };
       const token = await createToken({ payload });
 
       const verificationLink = `/add-details?token=${token}`;
@@ -121,7 +121,7 @@ export class AuthService {
     }
 
     return {
-      data: toUserDto(data as User),
+      data: toUserDto(data as UserDocument),
       verified: true,
       message: 'Logged In Successfully!',
     };
