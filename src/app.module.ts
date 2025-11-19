@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { CartModule } from './cart/cart.module';
 
 config();
 
@@ -33,6 +34,7 @@ config();
     AdminModule,
     ProductsModule,
     CategoriesModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [
