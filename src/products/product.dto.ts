@@ -15,8 +15,8 @@ export class CreateProductDto {
   description: string;
 
   @ApiProperty()
-  @IsNumber()
-  categoryId: number;
+  @IsString()
+  categoryId: string;
 
   @ApiProperty()
   @IsNumber()
@@ -45,9 +45,9 @@ export class UpdateProductDto {
   description?: string;
 
   @ApiProperty({ required: false })
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  categoryId?: number;
+  categoryId?: string;
 
   @ApiProperty({ required: false })
   @IsNumber()

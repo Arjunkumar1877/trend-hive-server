@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength } from 'class-validator';
-import { Admin } from 'src/data/entities/admin.entity';
+import { Admin, AdminDocument } from 'src/data/schemas/admin.schema';
 
 export class AdminLoginDto {
   @ApiProperty({
@@ -25,10 +25,10 @@ export class AdminLoginDto {
 
 export class AdminLoginResponseDto {
   @ApiProperty({
-    example: 1,
+    example: '507f1f77bcf86cd799439011',
     description: 'The unique ID of the admin',
   })
-  id: number;
+  id: string;
 
   @ApiProperty({
     example: 'John Doe',
@@ -45,18 +45,19 @@ export class AdminLoginResponseDto {
   @ApiProperty({
     example: '2025-03-26T12:00:00.000Z',
     description: 'The date and time when the admin was created',
+    required: false,
   })
-  createdAt: Date;
+  createdAt?: Date;
 }
 
 
 
 
-export function toAdminDto(admin: Admin): AdminLoginResponseDto {
+export function toAdminDto(admin: AdminDocument): AdminLoginResponseDto {
   return {
-    id: admin.id,
+    id: admin._id.toString(),
     name: admin.name,
     email: admin.email,
-    createdAt: admin.createdAt
+    createdAt: admin.createdAt || new Date()
   };
 }

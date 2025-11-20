@@ -1,13 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString } from 'class-validator';
-import { Address, User } from 'src/data/entities';
+import { Address, AddressDocument } from 'src/data/schemas/address.schema';
+import { User, UserDocument } from 'src/data/schemas/user.schema';
 
 export class AddressDto {
   @ApiProperty({
-    example: 1,
+    example: '507f1f77bcf86cd799439011',
     description: 'The unique identifier of the address',
   })
-  id: number;
+  id: string;
 
   @ApiProperty({ example: 'New York', description: 'The city of the address' })
   @IsString()
@@ -30,8 +31,8 @@ export class AddressDto {
 }
 
 export class UserDto {
-  @ApiProperty({ example: 1, description: 'The unique identifier of the user' })
-  id: number;
+  @ApiProperty({ example: '507f1f77bcf86cd799439011', description: 'The unique identifier of the user' })
+  id: string;
 
   @ApiProperty({ example: 'John Doe', description: 'The name of the user' })
   @IsString()
@@ -69,21 +70,32 @@ export class UserDto {
   addresses?: AddressDto[];
 }
 
-export function toUserDto(user: User): UserDto {
+export function toUserDto(user: UserDocument): UserDto {
+  const addresses: AddressDto[] = [];
+  
+  if (user.addresses && Array.isArray(user.addresses)) {
+    for (const address of user.addresses) {
+      // If address is populated, it will be an AddressDocument, otherwise it's an ObjectId
+      if (address && typeof address === 'object' && 'city' in address && '_id' in address) {
+        addresses.push(toAddressDto(address as unknown as AddressDocument));
+      }
+    }
+  }
+  
   return {
-    id: user.id,
+    id: user._id.toString(),
     name: user.name,
     email: user.email,
     phoneNumber: user.phoneNumber,
     firebaseId: user.firebaseId,
     isEmailVerified: !!user.isEmailVerified,
-    addresses: user?.addresses?.map((address) => toAddressDto(address)) || [],
+    addresses: addresses,
   };
 }
 
-export function toAddressDto(address: Address): AddressDto {
+export function toAddressDto(address: AddressDocument): AddressDto {
   return {
-    id: address.id,
+    id: address._id.toString(),
     city: address.city,
     state: address.state,
     country: address.country,

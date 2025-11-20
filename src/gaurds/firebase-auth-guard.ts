@@ -17,13 +17,16 @@ export class FirebaseAuthGuard implements CanActivate {
 
     try {
       const decodedToken = await this.firebaseService.decodeToken(token);
-      const userDetails = await this.userSerivce.findOneOrFail({
-        firebaseId: decodedToken.uid,
-      });
+      const userDetails = await this.userSerivce.findUserByFirebaseId(decodedToken.uid);
+      
+      if (!userDetails) {
+        return false;
+      }
+      
       request.user = {
         email: decodedToken.email,
         uid: decodedToken.uid,
-        userId: userDetails.id,
+        userId: userDetails._id.toString(),
       };
       return true;
     } catch (err) {
