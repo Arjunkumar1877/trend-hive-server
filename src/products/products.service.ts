@@ -1,10 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 import { Product, ProductDocument } from '../data/schemas/product.schema';
 import { Category, CategoryDocument } from '../data/schemas/category.schema';
 import { Image, ImageDocument } from '../data/schemas/image.schema';
-import { CreateProductDto, UpdateProductDto } from './product.dto';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  GetProductsQueryDto,
+  PaginatedProductsResponseDto,
+} from './product.dto';
 import { FirebaseStorageService } from '../firebase/firebase-storage.service';
 
 @Injectable()
@@ -51,8 +56,64 @@ export class ProductsService {
     return this.findOne(savedProduct._id.toString());
   }
 
-  async findAll(): Promise<ProductDocument[]> {
-    return this.productModel.find().populate('category').populate('images').exec();
+  async findAll(query: GetProductsQueryDto): Promise<PaginatedProductsResponseDto> {
+    const filter: FilterQuery<ProductDocument> = {};
+
+    if (query.search) {
+      filter.name = { $regex: query.search.trim(), $options: 'i' };
+    }
+
+    if (query.categoryId && Types.ObjectId.isValid(query.categoryId)) {
+      filter.category = new Types.ObjectId(query.categoryId);
+    }
+
+    if (query.minPrice !== undefined || query.maxPrice !== undefined) {
+      const priceFilters: Record<string, number> = {};
+      if (query.minPrice !== undefined) {
+        priceFilters.$gte = query.minPrice;
+      }
+      if (query.maxPrice !== undefined) {
+        priceFilters.$lte = query.maxPrice;
+      }
+
+      filter.price = priceFilters as unknown as number;
+    }
+
+    if (query.inStock !== undefined) {
+      filter.availableQuantity = query.inStock ? ({ $gt: 0 } as any) : ({ $lte: 0 } as any);
+    }
+
+    const sortBy = query.sortBy ?? 'createdAt';
+    const sortOrder = query.sortOrder === 'asc' ? 1 : -1;
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    const [products, totalItems] = await Promise.all([
+      this.productModel
+        .find(filter)
+        .populate('category')
+        .populate('images')
+        .sort({ [sortBy]: sortOrder })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.productModel.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit) || 1;
+
+    return {
+      data: products,
+      meta: {
+        totalItems,
+        totalPages,
+        page,
+        limit,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      },
+    };
   }
 
   async findOne(id: string): Promise<ProductDocument> {
