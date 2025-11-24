@@ -1,9 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFiles, UploadedFile, Query, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFiles,
+  Query,
+  BadRequestException,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto, UpdateProductDto, AddImagesToProductDto } from './product.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  CreateProductDto,
+  UpdateProductDto,
+  AddImagesToProductDto,
+  GetProductsQueryDto,
+  PaginatedProductsResponseDto,
+} from './product.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { Product } from '../data/schemas/product.schema';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('products')
 @Controller('products')
@@ -66,10 +84,14 @@ export class ProductsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all products' })
-  @ApiResponse({ status: 200, description: 'Return all products', type: [Product] })
-  findAll() {
-    return this.productsService.findAll();
+  @ApiOperation({ summary: 'Get products with filtering, sorting, and pagination' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return products with metadata',
+    type: PaginatedProductsResponseDto,
+  })
+  findAll(@Query() query: GetProductsQueryDto) {
+    return this.productsService.findAll(query);
   }
 
   @Get(':id')
