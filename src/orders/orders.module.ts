@@ -9,6 +9,8 @@ import { User, UserSchema } from '../data/schemas/user.schema';
 import { Image, ImageSchema } from '../data/schemas/image.schema';
 import { CartModule } from '../cart/cart.module';
 import { UsersModule } from '../users/users.module';
+import { InventoryModule } from '../inventory/inventory.module';
+import { FirebaseModule } from '../firebase/firebase.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { UsersModule } from '../users/users.module';
     ]),
     CartModule,
     UsersModule,
+    InventoryModule,
+    FirebaseModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

@@ -18,6 +18,7 @@ import {
   OrderItemResponseDto,
 } from './order.dto';
 import { CartService } from '../cart/cart.service';
+import { InventoryService } from '../inventory/inventory.service';
 
 @Injectable()
 export class OrdersService {
@@ -33,6 +34,7 @@ export class OrdersService {
     @InjectModel(Image.name)
     private imageModel: Model<ImageDocument>,
     private readonly cartService: CartService,
+    private readonly inventoryService: InventoryService,
   ) {}
 
   async createOrder(userId: string, createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
@@ -46,6 +48,14 @@ export class OrdersService {
     }
 
     const itemDetails = await this.prepareOrderItems(createOrderDto.items);
+    
+    // Reserve inventory before creating the order
+    const inventoryItems = itemDetails.map((item) => ({
+      productId: item.productId.toString(),
+      quantity: item.quantity,
+    }));
+    await this.inventoryService.reserveStock(inventoryItems);
+
     const subtotal = itemDetails.reduce((sum, item) => sum + item.subtotal, 0);
     const shippingFee = createOrderDto.shippingFee ?? 0;
     const tax = createOrderDto.tax ?? 0;
@@ -199,7 +209,7 @@ export class OrdersService {
   }
 
   async cancelOrder(orderId: string, userId: string): Promise<OrderResponseDto> {
-    const order = await this.orderModel.findById(orderId).exec();
+    const order = await this.orderModel.findById(orderId).populate('items').exec();
     if (!order) {
       throw new NotFoundException('Order not found');
     }
@@ -211,6 +221,14 @@ export class OrdersService {
     if (![OrderStatus.PENDING, OrderStatus.PROCESSING].includes(order.status)) {
       throw new BadRequestException('Order cannot be cancelled at this stage');
     }
+
+    // Restore inventory
+    const orderItems = await this.orderItemModel.find({ orderId: order._id }).exec();
+    const inventoryItems = orderItems.map((item) => ({
+      productId: item.product.toString(),
+      quantity: item.quantity,
+    }));
+    await this.inventoryService.restoreStock(inventoryItems);
 
     order.status = OrderStatus.CANCELLED;
     order.cancelledAt = new Date();
@@ -232,6 +250,14 @@ export class OrdersService {
     if (order.paymentStatus !== PaymentStatus.PAID) {
       throw new BadRequestException('Only paid orders can be refunded');
     }
+
+    // Restore inventory
+    const orderItems = await this.orderItemModel.find({ orderId: order._id }).exec();
+    const inventoryItems = orderItems.map((item) => ({
+      productId: item.product.toString(),
+      quantity: item.quantity,
+    }));
+    await this.inventoryService.restoreStock(inventoryItems);
 
     order.status = OrderStatus.REFUNDED;
     order.paymentStatus = PaymentStatus.REFUNDED;
