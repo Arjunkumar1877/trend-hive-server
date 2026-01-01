@@ -37,4 +37,3 @@ export const ReviewSchema = SchemaFactory.createForClass(Review);
 // Create compound index to ensure user can only review a product once
 ReviewSchema.index({ product: 1, user: 1 }, { unique: true });
 
-
