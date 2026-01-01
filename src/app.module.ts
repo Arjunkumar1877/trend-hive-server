@@ -17,6 +17,7 @@ import { CartModule } from './cart/cart.module';
 import { OrdersModule } from './orders/orders.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { WishlistModule } from './wishlist/wishlist.module';
 
 config();
 
@@ -41,6 +42,7 @@ config();
     OrdersModule,
     InventoryModule,
     ReviewsModule,
+    WishlistModule,
   ],
   controllers: [AppController],
   providers: [
