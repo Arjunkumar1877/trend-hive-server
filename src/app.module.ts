@@ -19,6 +19,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { ShippingModule } from './shipping/shipping.module';
+import { PaymentModule } from './payment/payment.module';
 
 config();
 
@@ -45,6 +46,7 @@ config();
     ReviewsModule,
     WishlistModule,
     ShippingModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
