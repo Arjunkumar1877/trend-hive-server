@@ -72,13 +72,31 @@ export class CartService {
         .exec();
       const coverImage = images.find((img) => img.isCover) || images[0];
 
+      let price = product.price;
+      let variantName: string | undefined = undefined;
+      let productImage = coverImage?.image;
+
+      if (item.variantId && product.variants) {
+        const variant = product.variants.find(v => (v as any)._id.toString() === item.variantId);
+        if (variant) {
+          if (variant.priceModifier) {
+            price += variant.priceModifier;
+          }
+          variantName = `${variant.size} / ${variant.color}`;
+          // Could also look for variant specific image if we had that mapping, 
+          // but for now relying on product images.
+        }
+      }
+
       populatedItems.push({
         productId: product._id.toString(),
         productName: product.name,
-        productPrice: product.price,
+        productPrice: price,
         quantity: item.quantity,
-        subtotal: product.price * item.quantity,
-        productImage: coverImage?.image,
+        subtotal: price * item.quantity,
+        productImage: productImage,
+        variantId: item.variantId,
+        variantName: variantName,
       });
     }
 
@@ -111,18 +129,40 @@ export class CartService {
       throw new NotFoundException('Product not found');
     }
 
-    // Check if product is available
-    if (product.availableQuantity < addToCartDto.quantity) {
+    // Check for variants
+    let availableStock = product.availableQuantity;
+    let variantPrice = product.price;
+
+    if (product.variants && product.variants.length > 0) {
+      if (!addToCartDto.variantId) {
+        throw new BadRequestException('Product has variants. Please select a variant.');
+      }
+
+      const variant = product.variants.find(v => (v as any)._id.toString() === addToCartDto.variantId);
+      if (!variant) {
+        throw new NotFoundException('Variant not found');
+      }
+
+      availableStock = variant.stock;
+      if (variant.priceModifier) {
+        variantPrice += variant.priceModifier;
+      }
+    }
+
+    // Check if product/variant is available
+    if (availableStock < addToCartDto.quantity) {
       throw new BadRequestException(
-        `Insufficient stock. Only ${product.availableQuantity} items available.`,
+        `Insufficient stock. Only ${availableStock} items available.`,
       );
     }
 
     const cart = await this.getOrCreateCart(userId);
 
-    // Check if product already exists in cart
+    // Check if product already exists in cart with same variant
     const existingItemIndex = cart.items.findIndex(
-      (item) => item.product.toString() === addToCartDto.productId,
+      (item) => 
+        item.product.toString() === addToCartDto.productId && 
+        item.variantId === addToCartDto.variantId
     );
 
     if (existingItemIndex !== -1) {
@@ -130,9 +170,9 @@ export class CartService {
       const newQuantity = cart.items[existingItemIndex].quantity + addToCartDto.quantity;
 
       // Check stock availability
-      if (product.availableQuantity < newQuantity) {
+      if (availableStock < newQuantity) {
         throw new BadRequestException(
-          `Insufficient stock. Only ${product.availableQuantity} items available.`,
+          `Insufficient stock. Only ${availableStock} items available.`,
         );
       }
 
@@ -142,6 +182,7 @@ export class CartService {
       cart.items.push({
         product: product._id,
         quantity: addToCartDto.quantity,
+        variantId: addToCartDto.variantId,
       });
     }
 
@@ -162,17 +203,28 @@ export class CartService {
       throw new NotFoundException('Product not found');
     }
 
+    // Check for variants stock
+    let availableStock = product.availableQuantity;
+    if (updateCartItemDto.variantId && product.variants) {
+       const variant = product.variants.find(v => (v as any)._id.toString() === updateCartItemDto.variantId);
+       if (variant) {
+         availableStock = variant.stock;
+       }
+    }
+
     // Check stock availability
-    if (product.availableQuantity < updateCartItemDto.quantity) {
+    if (availableStock < updateCartItemDto.quantity) {
       throw new BadRequestException(
-        `Insufficient stock. Only ${product.availableQuantity} items available.`,
+        `Insufficient stock. Only ${availableStock} items available.`,
       );
     }
 
     const cart = await this.getOrCreateCart(userId);
 
     const itemIndex = cart.items.findIndex(
-      (item) => item.product.toString() === updateCartItemDto.productId,
+      (item) => 
+        item.product.toString() === updateCartItemDto.productId &&
+        item.variantId === updateCartItemDto.variantId
     );
 
     if (itemIndex === -1) {
@@ -188,11 +240,13 @@ export class CartService {
   /**
    * Remove item from cart
    */
-  async removeFromCart(userId: string, productId: string): Promise<CartResponseDto> {
+  async removeFromCart(userId: string, productId: string, variantId?: string): Promise<CartResponseDto> {
     const cart = await this.getOrCreateCart(userId);
 
     const itemIndex = cart.items.findIndex(
-      (item) => item.product.toString() === productId,
+      (item) => 
+        item.product.toString() === productId &&
+        item.variantId === variantId
     );
 
     if (itemIndex === -1) {

@@ -8,6 +8,7 @@ import {
   Param,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CartService } from './cart.service';
@@ -70,9 +71,10 @@ export class CartController {
   async removeFromCart(
     @Request() req,
     @Param('productId') productId: string,
+    @Query('variantId') variantId?: string,
   ): Promise<CartResponseDto> {
     const userId = await this.getUserIdFromRequest(req);
-    return this.cartService.removeFromCart(userId, productId);
+    return this.cartService.removeFromCart(userId, productId, variantId);
   }
 
   @Delete('clear')

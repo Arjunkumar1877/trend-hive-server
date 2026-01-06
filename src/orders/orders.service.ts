@@ -53,6 +53,7 @@ export class OrdersService {
     const inventoryItems = itemDetails.map((item) => ({
       productId: item.productId.toString(),
       quantity: item.quantity,
+      variantId: item.variantId,
     }));
     await this.inventoryService.reserveStock(inventoryItems);
 
@@ -94,6 +95,8 @@ export class OrdersService {
         quantity: item.quantity,
         subtotal: item.subtotal,
         productImage: item.productImage,
+        variantId: item.variantId,
+        variantName: item.variantName,
       })),
     );
 
@@ -279,6 +282,8 @@ export class OrdersService {
       quantity: number;
       subtotal: number;
       productImage?: string;
+      variantId?: string;
+      variantName?: string;
     }>
   > {
     const preparedItems: Array<{
@@ -288,6 +293,8 @@ export class OrdersService {
       quantity: number;
       subtotal: number;
       productImage?: string;
+      variantId?: string;
+      variantName?: string;
     }> = [];
 
     for (const item of items) {
@@ -297,7 +304,32 @@ export class OrdersService {
       }
 
       if (product.availableQuantity < item.quantity) {
-        throw new BadRequestException(`Insufficient stock for ${product.name}`);
+        // This initial check might be loose if we have variants, 
+        // but we should check specific variant stock below.
+        // If product has variants, availableQuantity is sum of variants.
+      }
+
+      let price = product.price;
+      let variantName: string | undefined = undefined;
+      let availableStock = product.availableQuantity;
+
+      if (item.variantId && product.variants && product.variants.length > 0) {
+        const variant = product.variants.find((v: any) => v._id.toString() === item.variantId);
+        if (!variant) {
+           throw new NotFoundException(`Variant not found for product ${product.name}`);
+        }
+        
+        availableStock = variant.stock;
+        if (variant.priceModifier) {
+          price += variant.priceModifier;
+        }
+        variantName = `${variant.size} / ${variant.color}`;
+      } else if (product.variants && product.variants.length > 0 && !item.variantId) {
+         throw new BadRequestException(`Product ${product.name} has variants, but none selected`);
+      }
+
+      if (availableStock < item.quantity) {
+         throw new BadRequestException(`Insufficient stock for ${product.name}`);
       }
 
       const images = await this.imageModel.find({ product: product._id }).exec();
@@ -306,10 +338,12 @@ export class OrdersService {
       preparedItems.push({
         productId: product._id,
         productName: product.name,
-        productPrice: product.price,
+        productPrice: price,
         quantity: item.quantity,
-        subtotal: product.price * item.quantity,
+        subtotal: price * item.quantity,
         productImage: coverImage?.image,
+        variantId: item.variantId,
+        variantName: variantName,
       });
     }
 
@@ -351,6 +385,8 @@ export class OrdersService {
       quantity: orderItem.quantity,
       subtotal: orderItem.subtotal,
       productImage: orderItem.productImage,
+      variantId: orderItem.variantId,
+      variantName: orderItem.variantName,
     };
   }
 

@@ -35,8 +35,11 @@ export class ProductsService {
       name: createProductDto.name,
       price: createProductDto.price,
       description: createProductDto.description,
-      availableQuantity: createProductDto.availableQuantity,
+      availableQuantity: createProductDto.variants?.length
+        ? createProductDto.variants.reduce((sum, v) => sum + v.stock, 0)
+        : createProductDto.availableQuantity,
       category: category._id,
+      variants: createProductDto.variants || [],
     });
 
     const savedProduct = await product.save();
@@ -154,11 +157,27 @@ export class ProductsService {
     }
 
     // Update other product properties
+    // Update other product properties
     if (updateProductDto.name) product.name = updateProductDto.name;
     if (updateProductDto.price) product.price = updateProductDto.price;
     if (updateProductDto.description) product.description = updateProductDto.description;
-    if (updateProductDto.availableQuantity !== undefined) {
-      product.availableQuantity = updateProductDto.availableQuantity;
+    
+    if (updateProductDto.variants) {
+      product.variants = updateProductDto.variants as any; // Cast as any because of schema types mismatch in TS
+      // Recalculate available quantity based on variants
+      product.availableQuantity = updateProductDto.variants.reduce((sum, v) => sum + v.stock, 0);
+    } else if (updateProductDto.availableQuantity !== undefined) {
+      // Only update explicit availableQuantity if variants are not being updated/used
+      // If product has variants, availableQuantity should ideally come from them
+      if (product.variants && product.variants.length > 0) {
+        // If updating only quantity on a variant product, we might need a specific variant update logic
+        // For now, we assume simple product update or full variant replacement
+        // If user tries to set quantity on variant product without variants, ignore or warn?
+        // Let's stick to simple logic: if variants exist, sum them.
+        product.availableQuantity = product.variants.reduce((sum, v) => sum + v.stock, 0);
+      } else {
+        product.availableQuantity = updateProductDto.availableQuantity;
+      }
     }
 
     return product.save();

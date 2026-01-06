@@ -23,7 +23,14 @@ export class OrderItemInputDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
+  @IsNumber()
+  @Min(1)
   quantity: number;
+
+  @ApiProperty({ description: 'Variant ID (optional)', required: false })
+  @IsOptional()
+  @IsString()
+  variantId?: string;
 }
 
 export class OrderAddressDto implements OrderAddress {
@@ -156,6 +163,12 @@ export class OrderItemResponseDto {
 
   @ApiProperty({ required: false })
   productImage?: string;
+
+  @ApiProperty({ required: false })
+  variantId?: string;
+
+  @ApiProperty({ required: false })
+  variantName?: string;
 }
 
 export class OrderResponseDto {
