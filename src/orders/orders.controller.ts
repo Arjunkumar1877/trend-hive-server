@@ -17,6 +17,7 @@ import {
   UpdatePaymentStatusDto,
 } from './order.dto';
 import { FirebaseAuthGuard } from '../gaurds/firebase-auth-guard';
+import { AdminGuard } from '../gaurds/admin.guard';
 
 @ApiTags('orders')
 @Controller('orders')
@@ -47,6 +48,7 @@ export class OrdersController {
   }
 
   @Patch(':orderId/status')
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Update order status (admin only)' })
   @ApiResponse({ status: 200, type: OrderResponseDto })
   updateOrderStatus(
@@ -57,6 +59,7 @@ export class OrdersController {
   }
 
   @Patch(':orderId/payment-status')
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Update order payment status (admin only)' })
   @ApiResponse({ status: 200, type: OrderResponseDto })
   updatePaymentStatus(
@@ -74,6 +77,7 @@ export class OrdersController {
   }
 
   @Post(':orderId/refund')
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Refund an order (admin only)' })
   @ApiResponse({ status: 200, type: OrderResponseDto })
   refundOrder(@Param('orderId') orderId: string): Promise<OrderResponseDto> {
@@ -81,6 +85,7 @@ export class OrdersController {
   }
 
   @Get('admin/all')
+  @UseGuards(AdminGuard)
   @ApiOperation({ summary: 'Get all orders (admin only)' })
   @ApiResponse({ status: 200, type: [OrderResponseDto] })
   getAllOrders(): Promise<OrderResponseDto[]> {
