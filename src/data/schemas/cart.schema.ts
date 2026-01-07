@@ -15,6 +15,7 @@ export class Cart {
       {
         product: { type: Types.ObjectId, ref: 'Product', required: true },
         quantity: { type: Number, required: true, min: 1 },
+        variantId: { type: String }, // Store as string to match subdoc ID
       },
     ],
     default: [],
@@ -22,6 +23,7 @@ export class Cart {
   items: Array<{
     product: Types.ObjectId;
     quantity: number;
+    variantId?: string;
   }>;
 
   createdAt?: Date;

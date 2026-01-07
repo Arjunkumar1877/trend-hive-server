@@ -19,9 +19,16 @@ import {
   GetProductsQueryDto,
   PaginatedProductsResponseDto,
 } from './product.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Product } from '../data/schemas/product.schema';
 import { FilesInterceptor } from '@nestjs/platform-express';
+// JwtAuthGuard removed, using AuthGuard('jwt') directly
+// Wait, I need to check if JwtAuthGuard exists. It was not in the file list earlier. 
+// auth folder had: auth.controller.spec.ts, auth.controller.ts, auth.dto.ts, auth.module.ts, auth.service.spec.ts, auth.service.ts, jwt.startegy.ts.
+// It seems I might need to Create JwtAuthGuard or use AuthGuard('jwt').
+import { AuthGuard } from '@nestjs/passport';
+import { UseGuards } from '@nestjs/common';
+import { AdminGuard } from '../gaurds/admin.guard';
 
 @ApiTags('products')
 @Controller('products')
@@ -29,6 +36,8 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponse({ status: 201, description: 'Product created successfully', type: Product })
   create(@Body() createProductDto: CreateProductDto) {
@@ -36,6 +45,8 @@ export class ProductsController {
   }
 
   @Post('upload-images')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @ApiBearerAuth()
   @UseInterceptors(FilesInterceptor('images', 10))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -74,6 +85,8 @@ export class ProductsController {
   }
 
   @Post(':id/images')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Add images to an existing product' })
   @ApiResponse({ status: 200, description: 'Images added to product successfully', type: Product })
   async addImagesToProduct(
@@ -102,6 +115,8 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a product' })
   @ApiResponse({ status: 200, description: 'Product updated successfully', type: Product })
   update(
@@ -112,6 +127,8 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'), AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete a product' })
   @ApiResponse({ status: 200, description: 'Product deleted successfully' })
   remove(@Param('id') id: string) {

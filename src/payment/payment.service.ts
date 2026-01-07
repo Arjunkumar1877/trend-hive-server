@@ -33,7 +33,7 @@ export class PaymentService {
       this.logger.warn('STRIPE_SECRET_KEY not found. Payment functionality will be limited.');
     } else {
       this.stripe = new Stripe(stripeSecretKey, {
-        apiVersion: '2024-12-18.acacia',
+        apiVersion: '2025-12-15.clover',
       });
     }
   }
@@ -89,6 +89,7 @@ export class PaymentService {
 
       // Update order with payment intent ID
       order.paymentMethod = createPaymentIntentDto.paymentMethod;
+      order.paymentIntentId = paymentIntent.id;
       await order.save();
 
       return {
@@ -274,10 +275,8 @@ export class PaymentService {
       throw new NotFoundException('Order not found');
     }
 
-    // If order has a payment intent ID stored, retrieve it from Stripe
-    // For now, return the order's payment status
     return {
-      paymentIntentId: '', // Would need to store this in order
+      paymentIntentId: order.paymentIntentId || '',
       status: order.paymentStatus,
       orderId: order._id.toString(),
     };
@@ -297,13 +296,35 @@ export class PaymentService {
       throw new BadRequestException('Order is not paid');
     }
 
+    if (!order.paymentIntentId) {
+       throw new BadRequestException('Payment Intent ID not found for this order. Cannot process refund.');
+    }
+
     if (!this.stripe) {
       throw new BadRequestException('Payment service is not configured');
     }
 
-    // In a real implementation, you would store the payment intent ID in the order
-    // For now, this is a placeholder
-    throw new BadRequestException('Refund functionality requires payment intent ID storage');
+    try {
+      const refundParams: Stripe.RefundCreateParams = {
+        payment_intent: order.paymentIntentId,
+      };
+
+      if (amount) {
+        refundParams.amount = Math.round(amount * 100);
+      }
+
+      const refund = await this.stripe.refunds.create(refundParams);
+
+      await this.ordersService.updatePaymentStatus(orderId, PaymentStatus.REFUNDED);
+      
+      return {
+        refundId: refund.id,
+        status: refund.status || 'unknown',
+      };
+    } catch (error) {
+      this.logger.error('Error processing refund:', error);
+      throw new BadRequestException(`Failed to process refund: ${error.message}`);
+    }
   }
 }
 

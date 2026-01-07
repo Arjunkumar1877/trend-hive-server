@@ -61,6 +61,9 @@ export class Order {
   @Prop({ type: String })
   paymentMethod?: string;
 
+  @Prop({ type: String })
+  paymentIntentId?: string;
+
   @Prop({ type: String, enum: Object.values(OrderStatus), default: OrderStatus.PENDING })
   status: OrderStatus;
 

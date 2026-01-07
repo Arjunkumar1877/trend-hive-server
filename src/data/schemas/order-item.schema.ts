@@ -28,8 +28,11 @@ export class OrderItem {
   @Prop({ required: false })
   productImage?: string;
 
-  @Prop({ required: false })
-  variant?: string;
+  @Prop({ type: String })
+  variantId?: string;
+
+  @Prop({ type: String })
+  variantName?: string;
 
   createdAt?: Date;
   updatedAt?: Date;

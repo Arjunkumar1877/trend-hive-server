@@ -9,6 +9,7 @@ import { Product, ProductDocument } from '../data/schemas/product.schema';
 
 export interface InventoryItem {
   productId: string;
+  variantId?: string;
   quantity: number;
 }
 
@@ -40,9 +41,23 @@ export class InventoryService {
       }
 
       if (product.availableQuantity < item.quantity) {
-        throw new BadRequestException(
-          `Insufficient stock for product "${product.name}". Available: ${product.availableQuantity}, Requested: ${item.quantity}`,
-        );
+        // If variantId is present, we should check variant stock
+        if (item.variantId) {
+             const variant = product.variants.find((v: any) => v._id.toString() === item.variantId);
+             if (!variant) {
+                 throw new NotFoundException(`Variant ${item.variantId} not found for product ${product.name}`);
+             }
+             if (variant.stock < item.quantity) {
+                 throw new BadRequestException(
+                    `Insufficient stock for product "${product.name}" variant. Available: ${variant.stock}, Requested: ${item.quantity}`
+                 );
+             }
+             // Valid stock
+        } else {
+           throw new BadRequestException(
+            `Insufficient stock for product "${product.name}". Available: ${product.availableQuantity}, Requested: ${item.quantity}`,
+          );
+        }
       }
     }
   }
@@ -55,14 +70,47 @@ export class InventoryService {
     await this.validateStock(items);
 
     // Then deduct stock for each item
+    // Then deduct stock for each item
     for (const item of items) {
-      await this.productModel
+      if (item.variantId) {
+        // Update variant stock
+        await this.productModel.updateOne(
+          { _id: item.productId, 'variants.sku': { $exists: true } }, // Verify variants exist
+             // Actually, variantId is the subdoc ID.
+             // We need to update nested array element.
+             // 'variants._id': item.variantId
+          { 
+             $inc: { 'variants.$[elem].stock': -item.quantity } 
+             // We also want to update total availableQuantity? 
+             // Ideally yes, but ProductsService logic maintained it as sum.
+             // If we decrement variant, we should also decrement main.
+             // But it's easier if availableQuantity is ALWAYS computed or we sync it.
+             // Simple approach: decrement both.
+          },
+          { 
+            arrayFilters: [{ 'elem._id': item.variantId }]
+            // We also need to decrement main availableQuantity
+          }
+        ).exec();
+        
+        // Decrement main quantity as well to keep in sync
+        await this.productModel
         .findByIdAndUpdate(
           item.productId,
           { $inc: { availableQuantity: -item.quantity } },
           { new: true },
         )
         .exec();
+
+      } else {
+        await this.productModel
+          .findByIdAndUpdate(
+            item.productId,
+            { $inc: { availableQuantity: -item.quantity } },
+            { new: true },
+          )
+          .exec();
+      }
     }
   }
 
@@ -79,6 +127,16 @@ export class InventoryService {
         continue;
       }
 
+      if (item.variantId) {
+          // Restore variant stock
+         await this.productModel.updateOne(
+          { _id: item.productId },
+          { $inc: { 'variants.$[elem].stock': item.quantity } },
+          { arrayFilters: [{ 'elem._id': item.variantId }] }
+        ).exec();
+      }
+      
+      // Always restore main quantity
       await this.productModel
         .findByIdAndUpdate(
           item.productId,

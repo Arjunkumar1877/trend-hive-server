@@ -14,6 +14,30 @@ import {
 import { Transform, Type } from 'class-transformer';
 import { Product } from '../data/schemas/product.schema';
 
+export class ProductVariantDto {
+  @ApiProperty()
+  @IsString()
+  size: string;
+
+  @ApiProperty()
+  @IsString()
+  color: string;
+
+  @ApiProperty()
+  @IsString()
+  sku: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @Min(0)
+  stock: number;
+
+  @ApiProperty({ required: false })
+  @IsNumber()
+  @IsOptional()
+  priceModifier?: number;
+}
+
 export class CreateProductDto {
   @ApiProperty()
   @IsString()
@@ -39,6 +63,12 @@ export class CreateProductDto {
   @IsArray()
   @IsOptional()
   images?: string[];
+
+  @ApiProperty({ type: [ProductVariantDto], required: false })
+  @IsArray()
+  @IsOptional()
+  @Type(() => ProductVariantDto)
+  variants?: ProductVariantDto[];
 }
 
 export class UpdateProductDto {
@@ -71,6 +101,12 @@ export class UpdateProductDto {
   @IsArray()
   @IsOptional()
   images?: string[];
+
+  @ApiProperty({ type: [ProductVariantDto], required: false })
+  @IsArray()
+  @IsOptional()
+  @Type(() => ProductVariantDto)
+  variants?: ProductVariantDto[];
 }
 
 export class GetProductsQueryDto {

@@ -20,6 +20,14 @@ export class AddToCartDto {
   @IsNumber()
   @Min(1)
   quantity: number;
+
+  @ApiProperty({
+    description: 'Variant ID (if applicable)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  variantId?: string;
 }
 
 export class UpdateCartItemDto {
@@ -40,6 +48,14 @@ export class UpdateCartItemDto {
   @IsNumber()
   @Min(1)
   quantity: number;
+
+  @ApiProperty({
+    description: 'Variant ID (if applicable)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  variantId?: string;
 }
 
 export class RemoveFromCartDto {
@@ -50,6 +66,14 @@ export class RemoveFromCartDto {
   @IsString()
   @IsMongoId()
   productId: string;
+
+  @ApiProperty({
+    description: 'Variant ID (if applicable)',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  variantId?: string;
 }
 
 export class CartItemResponseDto {
@@ -70,6 +94,12 @@ export class CartItemResponseDto {
 
   @ApiProperty({ required: false })
   productImage?: string;
+
+  @ApiProperty({ required: false })
+  variantId?: string;
+
+  @ApiProperty({ required: false })
+  variantName?: string; // e.g. "L / Red"
 }
 
 export class CartResponseDto {
