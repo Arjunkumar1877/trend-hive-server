@@ -314,7 +314,7 @@ export class OrdersService {
       let availableStock = product.availableQuantity;
 
       if (item.variantId && product.variants && product.variants.length > 0) {
-        const variant = product.variants.find((v: any) => v._id.toString() === item.variantId);
+        const variant = product.variants.find((v) => v._id.toString() === item.variantId);
         if (!variant) {
            throw new NotFoundException(`Variant not found for product ${product.name}`);
         }

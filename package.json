@@ -34,6 +34,7 @@
     "dotenv": "^16.4.7",
     "firebase": "^11.4.0",
     "firebase-admin": "^13.2.0",
+    "helmet": "^8.1.0",
     "mongoose": "^8.19.3",
     "nodemailer": "^6.10.0",
     "passport": "^0.7.0",

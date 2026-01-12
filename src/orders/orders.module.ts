@@ -11,6 +11,7 @@ import { CartModule } from '../cart/cart.module';
 import { UsersModule } from '../users/users.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { FirebaseModule } from '../firebase/firebase.module';
+import { CouponsModule } from '../coupons/coupons.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { FirebaseModule } from '../firebase/firebase.module';
     UsersModule,
     InventoryModule,
     FirebaseModule,
+    CouponsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],
