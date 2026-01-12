@@ -8,7 +8,6 @@ import { AuthModule } from './auth/auth.module';
 import { APP_PIPE } from '@nestjs/core';
 import { FirebaseModule } from './firebase/firebase.module';
 import { AddressModule } from './address/address.module';
-import { EncryptionService } from './helpers/encryption.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AdminModule } from './admin/admin.module';
 import { ProductsModule } from './products/products.module';
@@ -21,6 +20,7 @@ import { WishlistModule } from './wishlist/wishlist.module';
 import { ShippingModule } from './shipping/shipping.module';
 import { PaymentModule } from './payment/payment.module';
 import { CouponsModule } from './coupons/coupons.module';
+import { HelpersModule } from './helpers/helpers.module';
 
 config();
 
@@ -49,6 +49,7 @@ config();
     ShippingModule,
     PaymentModule,
     CouponsModule,
+    HelpersModule,
   ],
   controllers: [AppController],
   providers: [
@@ -57,7 +58,6 @@ config();
       provide: APP_PIPE,
       useClass: ValidationPipe,
     },
-    EncryptionService,
   ],
 })
 export class AppModule {}

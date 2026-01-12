@@ -19,6 +19,7 @@ import {
 } from './order.dto';
 import { CartService } from '../cart/cart.service';
 import { InventoryService } from '../inventory/inventory.service';
+import { EmailService } from '../helpers/email.service';
 
 @Injectable()
 export class OrdersService {
@@ -35,6 +36,7 @@ export class OrdersService {
     private imageModel: Model<ImageDocument>,
     private readonly cartService: CartService,
     private readonly inventoryService: InventoryService,
+    private readonly emailService: EmailService,
   ) {}
 
   async createOrder(userId: string, createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
@@ -102,10 +104,14 @@ export class OrdersService {
 
     order.items = orderItems.map((item) => item._id);
     await order.save();
+    
+    // Clear cart
+    await this.cartService.clearCart(userId);
 
-    if (createOrderDto.clearCart) {
-      await this.cartService.clearCart(userId);
-    }
+    // Send confirmation email (async, don't block response)
+    this.emailService.sendOrderConfirmation(user.email, order).catch((err) => {
+      console.error('Failed to send order confirmation email', err);
+    });
 
     const populatedOrder = await this.getOrderById(order._id.toString());
     if (!populatedOrder) {
