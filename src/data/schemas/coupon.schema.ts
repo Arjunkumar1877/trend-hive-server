@@ -27,7 +27,7 @@ export class Coupon {
   @Prop({ default: true })
   isActive: boolean;
 
-  @Prop({ default: null })
+  @Prop({ type: Number, default: null })
   usageLimit: number | null; // Null means unlimited
 
   @Prop({ default: 0 })

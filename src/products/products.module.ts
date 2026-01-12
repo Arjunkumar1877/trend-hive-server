@@ -6,6 +6,7 @@ import { Product, ProductSchema } from '../data/schemas/product.schema';
 import { Category, CategorySchema } from '../data/schemas/category.schema';
 import { Image, ImageSchema } from '../data/schemas/image.schema';
 import { FirebaseModule } from '../firebase/firebase.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { FirebaseModule } from '../firebase/firebase.module';
       { name: Image.name, schema: ImageSchema },
     ]),
     FirebaseModule,
+    UsersModule,
   ],
   controllers: [ProductsController],
   providers: [ProductsService],

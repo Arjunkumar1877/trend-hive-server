@@ -5,6 +5,8 @@ export type ProductDocument = Product & Document;
 
 @Schema()
 export class Variant {
+  _id: Types.ObjectId;
+
   @Prop({ required: true })
   size: string;
 
