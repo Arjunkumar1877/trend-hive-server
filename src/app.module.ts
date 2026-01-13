@@ -21,6 +21,7 @@ import { ShippingModule } from './shipping/shipping.module';
 import { PaymentModule } from './payment/payment.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { HelpersModule } from './helpers/helpers.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 config();
 
@@ -50,6 +51,7 @@ config();
     PaymentModule,
     CouponsModule,
     HelpersModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [
