@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { InventoryService, LowStockProduct } from './inventory.service';
-import { FirebaseAuthGuard } from '../gaurds/firebase-auth-guard';
+import { FirebaseAuthGuard } from '../guards/firebase-auth-guard';
 import { AdjustStockDto, SetStockDto } from './inventory.dto';
 
 @ApiTags('inventory')

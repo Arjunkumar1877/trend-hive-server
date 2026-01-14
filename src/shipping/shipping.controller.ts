@@ -7,7 +7,7 @@ import {
   ShippingRateDto,
   ShippingAddressDto,
 } from './shipping.dto';
-import { FirebaseAuthGuard } from '../gaurds/firebase-auth-guard';
+import { FirebaseAuthGuard } from '../guards/firebase-auth-guard';
 
 @ApiTags('shipping')
 @Controller('shipping')

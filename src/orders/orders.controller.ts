@@ -16,8 +16,8 @@ import {
   UpdateOrderStatusDto,
   UpdatePaymentStatusDto,
 } from './order.dto';
-import { FirebaseAuthGuard } from '../gaurds/firebase-auth-guard';
-import { AdminGuard } from '../gaurds/admin.guard';
+import { FirebaseAuthGuard } from '../guards/firebase-auth-guard';
+import { AdminGuard } from '../guards/admin.guard';
 
 @ApiTags('orders')
 @Controller('orders')
