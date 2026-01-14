@@ -13,7 +13,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CartService } from './cart.service';
 import { AddToCartDto, UpdateCartItemDto, CartResponseDto } from './cart.dto';
-import { FirebaseAuthGuard } from '../gaurds/firebase-auth-guard';
+import { FirebaseAuthGuard } from '../guards/firebase-auth-guard';
 import { UsersService } from '../users/users.service';
 
 @ApiTags('cart')

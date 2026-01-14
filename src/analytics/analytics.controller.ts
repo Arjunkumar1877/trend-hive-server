@@ -1,7 +1,7 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { AnalyticsService } from './analytics.service';
-import { AdminGuard } from '../gaurds/admin.guard';
+import { AdminGuard } from '../guards/admin.guard';
 
 @ApiTags('Analytics')
 @ApiBearerAuth()

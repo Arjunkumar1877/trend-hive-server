@@ -18,7 +18,7 @@ import {
   PaymentResponseDto,
   PaymentStatusDto,
 } from './payment.dto';
-import { FirebaseAuthGuard } from '../gaurds/firebase-auth-guard';
+import { FirebaseAuthGuard } from '../guards/firebase-auth-guard';
 import { UsersService } from '../users/users.service';
 
 @ApiTags('payment')
