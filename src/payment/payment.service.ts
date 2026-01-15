@@ -102,6 +102,11 @@ export class PaymentService {
       };
     } catch (error) {
       this.logger.error('Error creating payment intent:', error);
+      if (error instanceof Stripe.errors.StripeCardError) {
+        throw new BadRequestException(`Payment failed: ${error.message}`);
+      } else if (error instanceof Stripe.errors.StripeInvalidRequestError) {
+        throw new BadRequestException(`Invalid payment request: ${error.message}`);
+      }
       throw new BadRequestException(`Failed to create payment intent: ${error.message}`);
     }
   }
@@ -165,6 +170,9 @@ export class PaymentService {
       }
     } catch (error) {
       this.logger.error('Error confirming payment:', error);
+      if (error instanceof Stripe.errors.StripeCardError) {
+        throw new BadRequestException(`Payment confirmation failed: ${error.message}`);
+      }
       throw new BadRequestException(`Failed to confirm payment: ${error.message}`);
     }
   }
