@@ -28,7 +28,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 // It seems I might need to Create JwtAuthGuard or use AuthGuard('jwt').
 import { AuthGuard } from '@nestjs/passport';
 import { UseGuards } from '@nestjs/common';
-import { AdminGuard } from '../gaurds/admin.guard';
+import { AdminGuard } from '../guards/admin.guard';
 
 @ApiTags('products')
 @Controller('products')

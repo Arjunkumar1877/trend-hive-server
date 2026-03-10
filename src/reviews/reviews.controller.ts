@@ -20,7 +20,7 @@ import {
   AdminReviewResponseDto,
   ApproveReviewDto,
 } from './review.dto';
-import { FirebaseAuthGuard } from '../gaurds/firebase-auth-guard';
+import { FirebaseAuthGuard } from '../guards/firebase-auth-guard';
 
 @ApiTags('reviews')
 @Controller('reviews')

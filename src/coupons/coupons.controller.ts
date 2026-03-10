@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nes
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { CouponsService } from './coupons.service';
 import { CreateCouponDto, UpdateCouponDto, ValidateCouponDto } from './coupons.dto';
-import { AdminGuard } from '../gaurds/admin.guard';
+import { AdminGuard } from '../guards/admin.guard';
 import { AuthGuard } from '@nestjs/passport'; // Or your specific auth guard
 
 @ApiTags('coupons')
