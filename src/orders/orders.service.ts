@@ -20,6 +20,7 @@ import {
 import { CartService } from '../cart/cart.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { EmailService } from '../helpers/email.service';
+import { CouponsService } from '../coupons/coupons.service';
 
 @Injectable()
 export class OrdersService {
@@ -37,6 +38,7 @@ export class OrdersService {
     private readonly cartService: CartService,
     private readonly inventoryService: InventoryService,
     private readonly emailService: EmailService,
+    private readonly couponsService: CouponsService,
   ) {}
 
   async createOrder(userId: string, createOrderDto: CreateOrderDto): Promise<OrderResponseDto> {
@@ -62,7 +64,16 @@ export class OrdersService {
     const subtotal = itemDetails.reduce((sum, item) => sum + item.subtotal, 0);
     const shippingFee = createOrderDto.shippingFee ?? 0;
     const tax = createOrderDto.tax ?? 0;
-    const discount = createOrderDto.discount ?? 0;
+    
+    let discount = createOrderDto.discount ?? 0;
+    if (createOrderDto.couponCode) {
+      const validation = await this.couponsService.validateCoupon({
+        code: createOrderDto.couponCode,
+        orderTotal: subtotal,
+      });
+      discount = validation.discountAmount;
+      await this.couponsService.incrementUsage(createOrderDto.couponCode);
+    }
     const total = subtotal + shippingFee + tax - discount;
 
     if (total < 0) {
