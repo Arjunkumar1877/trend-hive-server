@@ -124,6 +124,11 @@ export class CreateOrderDto {
   @Min(0)
   discount?: number;
 
+  @ApiProperty({ example: 'SAVE10', required: false })
+  @IsOptional()
+  @IsString()
+  couponCode?: string;
+
   @ApiProperty({ example: true, required: false })
   @IsOptional()
   @IsBoolean()
